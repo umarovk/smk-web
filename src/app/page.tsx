@@ -3,15 +3,21 @@ import Link from "next/link";
 
 import Footbar from "@/components/footbar";
 import Navbar from "@/components/navbar";
-import { getFooterSettings, getHomepageSettings, getSiteSettings } from "@/sanity/lib/queries";
+import {
+  getFooterSettings,
+  getHomepageSettings,
+  getPartnerSettings,
+  getSiteSettings,
+} from "@/sanity/lib/queries";
 
 export const revalidate = 60;
 
 export default async function Home() {
-  const [schoolProfile, footerSettings, homepageSettings] = await Promise.all([
+  const [schoolProfile, footerSettings, homepageSettings, partnerSettings] = await Promise.all([
     getSiteSettings(),
     getFooterSettings(),
     getHomepageSettings(),
+    getPartnerSettings(),
   ]);
 
   return (
@@ -145,6 +151,65 @@ export default async function Home() {
             >
               Kelola Konten Sekolah
             </Link>
+          </div>
+        </section>
+
+        <section className="mt-14 rounded-2xl border border-emerald-100 bg-white px-6 py-8 sm:px-8">
+          <div className="text-center">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700">
+              Kolaborasi Industri
+            </p>
+            <h2 className="mt-2 text-2xl font-bold text-slate-900 sm:text-3xl">
+              {partnerSettings.heading}
+            </h2>
+            <p className="mx-auto mt-3 max-w-3xl text-sm leading-7 text-slate-600 sm:text-base">
+              {partnerSettings.description}
+            </p>
+          </div>
+
+          <div className="partner-marquee-container mt-8">
+            <div className="partner-marquee-track">
+              {[...partnerSettings.partners, ...partnerSettings.partners].map((partner, index) => {
+                const badgeLabel = partner.category === "media" ? "Media" : "MoU";
+
+                const card = (
+                  <article
+                    key={`${partner.name}-${index}`}
+                    className="flex w-52 shrink-0 items-center gap-3 rounded-xl border border-emerald-100 bg-white px-4 py-3 shadow-sm"
+                  >
+                    <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-md bg-slate-100">
+                      <Image
+                        src={partner.logoUrl}
+                        alt={`Logo ${partner.name}`}
+                        fill
+                        sizes="40px"
+                        className="object-contain p-1"
+                      />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-semibold text-slate-800">{partner.name}</p>
+                      <p className="text-xs text-slate-500">{badgeLabel}</p>
+                    </div>
+                  </article>
+                );
+
+                if (partner.website) {
+                  return (
+                    <a
+                      key={`${partner.name}-${index}`}
+                      href={partner.website}
+                      target="_blank"
+                      rel="noreferrer"
+                      aria-label={`Kunjungi website ${partner.name}`}
+                    >
+                      {card}
+                    </a>
+                  );
+                }
+
+                return card;
+              })}
+            </div>
           </div>
         </section>
       </main>

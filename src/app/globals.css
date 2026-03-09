@@ -24,3 +24,28 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+.partner-marquee-container {
+  overflow: hidden;
+  mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+}
+
+.partner-marquee-track {
+  display: flex;
+  width: max-content;
+  gap: 1rem;
+  animation: partner-marquee 24s linear infinite;
+}
+
+.partner-marquee-container:hover .partner-marquee-track {
+  animation-play-state: paused;
+}
+
+@keyframes partner-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}

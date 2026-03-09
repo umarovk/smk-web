@@ -36,6 +36,19 @@ export type HomepageGalleryFrame = {
   alt: string;
 };
 
+export type PartnerItem = {
+  name: string;
+  category: "media" | "company";
+  logoUrl: string;
+  website?: string;
+};
+
+export type PartnerSettings = {
+  heading: string;
+  description: string;
+  partners: PartnerItem[];
+};
+
 export type HomepageSettings = {
   heroBadge: string;
   heroTitlePrefix: string;
@@ -95,6 +108,19 @@ const homepageSettingsQuery = groq`
   }
 `;
 
+const partnerSettingsQuery = groq`
+  *[_type == "partnerSettings"] | order(_updatedAt desc)[0]{
+    heading,
+    description,
+    partners[]{
+      name,
+      category,
+      "logoUrl": logo.asset->url,
+      website
+    }
+  }
+`;
+
 const fallbackSiteSettings: SiteSettings = {
   siteName: "SMK Web",
   logoUrl: "/logo-smk.svg",
@@ -150,6 +176,18 @@ const fallbackHomepageSettings: HomepageSettings = {
   ctaTitlePrefix: "Bergabung Bersama",
   ctaDescription:
     "Mulai perjalanan belajar dengan sistem yang adaptif, dukungan guru berpengalaman, dan program praktik yang selaras dengan kebutuhan industri.",
+};
+
+const fallbackPartnerSettings: PartnerSettings = {
+  heading: "Media Partner & Industri MoU",
+  description:
+    "Sekolah kami berkolaborasi dengan media partner dan perusahaan industri untuk memperkuat pembelajaran berbasis dunia kerja.",
+  partners: [
+    { name: "Media Edukasi Nusantara", category: "media", logoUrl: "/logo-smk.svg" },
+    { name: "Tekno Industri Digital", category: "company", logoUrl: "/logo-smk.svg" },
+    { name: "Portal Sekolah Kreatif", category: "media", logoUrl: "/logo-smk.svg" },
+    { name: "Mitra Mekatronik Nasional", category: "company", logoUrl: "/logo-smk.svg" },
+  ],
 };
 
 export const getSiteSettings = cache(async function getSiteSettings(): Promise<SiteSettings> {
@@ -238,6 +276,32 @@ export const getHomepageSettings = cache(
       };
     } catch {
       return fallbackHomepageSettings;
+    }
+  },
+);
+
+export const getPartnerSettings = cache(
+  async function getPartnerSettings(): Promise<PartnerSettings> {
+    if (!sanityClient) {
+      return fallbackPartnerSettings;
+    }
+
+    try {
+      const data = await sanityClient.fetch<Partial<PartnerSettings> | null>(
+        partnerSettingsQuery,
+        {},
+        { next: { revalidate: 60 } },
+      );
+
+      return {
+        heading: data?.heading || fallbackPartnerSettings.heading,
+        description: data?.description || fallbackPartnerSettings.description,
+        partners:
+          data?.partners?.filter((item) => item?.name && item?.logoUrl && item?.category) ||
+          fallbackPartnerSettings.partners,
+      };
+    } catch {
+      return fallbackPartnerSettings;
     }
   },
 );
