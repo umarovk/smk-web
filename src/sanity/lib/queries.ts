@@ -21,6 +21,35 @@ export type FooterSettings = {
   quickLinks: FooterLink[];
 };
 
+export type HomepageMetric = {
+  label: string;
+  value: string;
+};
+
+export type HomepagePillar = {
+  title: string;
+  description: string;
+};
+
+export type HomepageGalleryFrame = {
+  imageUrl: string;
+  alt: string;
+};
+
+export type HomepageSettings = {
+  heroBadge: string;
+  heroTitlePrefix: string;
+  heroDescription: string;
+  heroFrameImageUrl: string;
+  heroFrameAlt: string;
+  metrics: HomepageMetric[];
+  pillarsHeading: string;
+  pillars: HomepagePillar[];
+  galleryFrames: HomepageGalleryFrame[];
+  ctaTitlePrefix: string;
+  ctaDescription: string;
+};
+
 const siteSettingsQuery = groq`
   *[_type == "siteSettings"] | order(_updatedAt desc)[0]{
     siteName,
@@ -41,6 +70,31 @@ const footerSettingsQuery = groq`
   }
 `;
 
+const homepageSettingsQuery = groq`
+  *[_type == "homepageSettings"] | order(_updatedAt desc)[0]{
+    heroBadge,
+    heroTitlePrefix,
+    heroDescription,
+    "heroFrameImageUrl": heroFrameImage.asset->url,
+    heroFrameAlt,
+    metrics[]{
+      label,
+      value
+    },
+    pillarsHeading,
+    pillars[]{
+      title,
+      description
+    },
+    galleryFrames[]{
+      "imageUrl": image.asset->url,
+      alt
+    },
+    ctaTitlePrefix,
+    ctaDescription
+  }
+`;
+
 const fallbackSiteSettings: SiteSettings = {
   siteName: "SMK Web",
   logoUrl: "/logo-smk.svg",
@@ -57,6 +111,45 @@ const fallbackFooterSettings: FooterSettings = {
     { label: "Profil Sekolah", href: "/profil" },
     { label: "Informasi PPDB", href: "#ppdb" },
   ],
+};
+
+const fallbackHomepageSettings: HomepageSettings = {
+  heroBadge: "Portal Resmi Sekolah",
+  heroTitlePrefix: "Pendidikan Modern untuk Masa Depan Cerah di",
+  heroDescription:
+    "Kami menghadirkan pembelajaran vokasi yang terarah, kolaboratif, dan dekat dengan dunia industri untuk menyiapkan siswa yang siap kerja maupun melanjutkan studi.",
+  heroFrameImageUrl: "/hero-sekolah.svg",
+  heroFrameAlt: "Ilustrasi lingkungan sekolah",
+  metrics: [
+    { label: "Program Keahlian", value: "TKJ & TSM" },
+    { label: "Kemitraan Industri", value: "35+ Mitra Aktif" },
+    { label: "Status PPDB", value: "Pendaftaran Dibuka" },
+  ],
+  pillarsHeading: "Lingkungan Belajar yang Profesional",
+  pillars: [
+    {
+      title: "Kurikulum Relevan Industri",
+      description:
+        "Materi pembelajaran disusun agar sesuai kebutuhan dunia kerja dan perkembangan teknologi.",
+    },
+    {
+      title: "Praktik Terarah",
+      description:
+        "Siswa belajar melalui proyek, praktik bengkel, dan simulasi kerja untuk memperkuat keterampilan.",
+    },
+    {
+      title: "Karakter & Disiplin",
+      description:
+        "Pembinaan karakter, komunikasi, dan etika kerja untuk menyiapkan lulusan yang profesional.",
+    },
+  ],
+  galleryFrames: [
+    { imageUrl: "/foto-sekolah-1.svg", alt: "Kegiatan pembelajaran siswa" },
+    { imageUrl: "/foto-sekolah-2.svg", alt: "Kegiatan praktik kejuruan siswa" },
+  ],
+  ctaTitlePrefix: "Bergabung Bersama",
+  ctaDescription:
+    "Mulai perjalanan belajar dengan sistem yang adaptif, dukungan guru berpengalaman, dan program praktik yang selaras dengan kebutuhan industri.",
 };
 
 export const getSiteSettings = cache(async function getSiteSettings(): Promise<SiteSettings> {
@@ -109,3 +202,42 @@ export const getFooterSettings = cache(async function getFooterSettings(): Promi
     return fallbackFooterSettings;
   }
 });
+
+export const getHomepageSettings = cache(
+  async function getHomepageSettings(): Promise<HomepageSettings> {
+    if (!sanityClient) {
+      return fallbackHomepageSettings;
+    }
+
+    try {
+      const data = await sanityClient.fetch<Partial<HomepageSettings> | null>(
+        homepageSettingsQuery,
+        {},
+        { next: { revalidate: 60 } },
+      );
+
+      return {
+        heroBadge: data?.heroBadge || fallbackHomepageSettings.heroBadge,
+        heroTitlePrefix: data?.heroTitlePrefix || fallbackHomepageSettings.heroTitlePrefix,
+        heroDescription: data?.heroDescription || fallbackHomepageSettings.heroDescription,
+        heroFrameImageUrl:
+          data?.heroFrameImageUrl || fallbackHomepageSettings.heroFrameImageUrl,
+        heroFrameAlt: data?.heroFrameAlt || fallbackHomepageSettings.heroFrameAlt,
+        metrics:
+          data?.metrics?.filter((item) => item?.label && item?.value) ||
+          fallbackHomepageSettings.metrics,
+        pillarsHeading: data?.pillarsHeading || fallbackHomepageSettings.pillarsHeading,
+        pillars:
+          data?.pillars?.filter((item) => item?.title && item?.description) ||
+          fallbackHomepageSettings.pillars,
+        galleryFrames:
+          data?.galleryFrames?.filter((item) => item?.imageUrl && item?.alt) ||
+          fallbackHomepageSettings.galleryFrames,
+        ctaTitlePrefix: data?.ctaTitlePrefix || fallbackHomepageSettings.ctaTitlePrefix,
+        ctaDescription: data?.ctaDescription || fallbackHomepageSettings.ctaDescription,
+      };
+    } catch {
+      return fallbackHomepageSettings;
+    }
+  },
+);
