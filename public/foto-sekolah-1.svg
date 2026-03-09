@@ -1,0 +1,10 @@
+<svg width="1200" height="800" viewBox="0 0 1200 800" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="800" fill="#E2E8F0"/>
+  <rect x="120" y="180" width="960" height="470" rx="24" fill="#CBD5E1"/>
+  <rect x="220" y="240" width="760" height="320" rx="16" fill="#94A3B8"/>
+  <rect x="270" y="290" width="200" height="180" rx="10" fill="#F8FAFC"/>
+  <rect x="500" y="290" width="200" height="180" rx="10" fill="#F8FAFC"/>
+  <rect x="730" y="290" width="200" height="180" rx="10" fill="#F8FAFC"/>
+  <rect x="120" y="120" width="360" height="40" rx="8" fill="#2563EB"/>
+  <text x="140" y="148" fill="white" font-family="Arial, Helvetica, sans-serif" font-size="22">Foto Dummy Lingkungan Sekolah</text>
+</svg>
