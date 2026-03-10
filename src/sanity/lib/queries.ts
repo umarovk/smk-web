@@ -103,13 +103,49 @@ export type HomepageSettings = {
   heroBadge: string;
   heroTitlePrefix: string;
   heroDescription: string;
+  heroPrimaryButtonLabel: string;
+  heroPrimaryButtonHref: string;
+  heroSecondaryButtonLabel: string;
+  heroSecondaryButtonHref: string;
   heroFrameImageUrl: string;
   heroFrameAlt: string;
   metrics: HomepageMetric[];
+  metricsButtonLabel: string;
+  metricsButtonHref: string;
   pillarsHeading: string;
   pillars: HomepagePillar[];
   galleryFrames: HomepageGalleryFrame[];
   ctaTitlePrefix: string;
+  ctaDescription: string;
+  ctaPrimaryButtonLabel: string;
+  ctaPrimaryButtonHref: string;
+  ctaSecondaryButtonLabel: string;
+  ctaSecondaryButtonHref: string;
+};
+
+export type TahfidzSettings = {
+  heroBadge: string;
+  heroTitle: string;
+  heroDescription: string;
+  heroImageUrl: string | null;
+  heroImageAlt: string;
+  targetHafalan: string;
+  programPoints: string[];
+  scheduleItems: string[];
+  benefits: string[];
+  ctaTitle: string;
+  ctaDescription: string;
+};
+
+export type SpmbSettings = {
+  heroBadge: string;
+  heroTitle: string;
+  heroDescription: string;
+  registrationInfo: string[];
+  requirements: string[];
+  registrationFlow: string[];
+  scheduleItems: string[];
+  ctaTitle: string;
   ctaDescription: string;
 };
 
@@ -138,12 +174,18 @@ const homepageSettingsQuery = groq`
     heroBadge,
     heroTitlePrefix,
     heroDescription,
+    heroPrimaryButtonLabel,
+    heroPrimaryButtonHref,
+    heroSecondaryButtonLabel,
+    heroSecondaryButtonHref,
     "heroFrameImageUrl": heroFrameImage.asset->url,
     heroFrameAlt,
     metrics[]{
       label,
       value
     },
+    metricsButtonLabel,
+    metricsButtonHref,
     pillarsHeading,
     pillars[]{
       title,
@@ -154,7 +196,11 @@ const homepageSettingsQuery = groq`
       alt
     },
     ctaTitlePrefix,
-    ctaDescription
+    ctaDescription,
+    ctaPrimaryButtonLabel,
+    ctaPrimaryButtonHref,
+    ctaSecondaryButtonLabel,
+    ctaSecondaryButtonHref
   }
 `;
 
@@ -168,6 +214,36 @@ const partnerSettingsQuery = groq`
       "logoUrl": logo.asset->url,
       website
     }
+  }
+`;
+
+const tahfidzSettingsQuery = groq`
+  *[_type == "tahfidzSettings"] | order(_updatedAt desc)[0]{
+    heroBadge,
+    heroTitle,
+    heroDescription,
+    "heroImageUrl": heroImage.asset->url,
+    heroImageAlt,
+    targetHafalan,
+    programPoints,
+    scheduleItems,
+    benefits,
+    ctaTitle,
+    ctaDescription
+  }
+`;
+
+const spmbSettingsQuery = groq`
+  *[_type == "spmbSettings"] | order(_updatedAt desc)[0]{
+    heroBadge,
+    heroTitle,
+    heroDescription,
+    registrationInfo,
+    requirements,
+    registrationFlow,
+    scheduleItems,
+    ctaTitle,
+    ctaDescription
   }
 `;
 
@@ -217,6 +293,10 @@ const fallbackHomepageSettings: HomepageSettings = {
   heroTitlePrefix: "Pendidikan Modern untuk Masa Depan Cerah di",
   heroDescription:
     "Kami menghadirkan pembelajaran vokasi yang terarah, kolaboratif, dan dekat dengan dunia industri untuk menyiapkan siswa yang siap kerja maupun melanjutkan studi.",
+  heroPrimaryButtonLabel: "Lihat Profil Sekolah",
+  heroPrimaryButtonHref: "/profil",
+  heroSecondaryButtonLabel: "Kelola Konten",
+  heroSecondaryButtonHref: "/studio",
   heroFrameImageUrl: "/hero-sekolah.svg",
   heroFrameAlt: "Ilustrasi lingkungan sekolah",
   metrics: [
@@ -224,6 +304,8 @@ const fallbackHomepageSettings: HomepageSettings = {
     { label: "Kemitraan Industri", value: "35+ Mitra Aktif" },
     { label: "Status PPDB", value: "Pendaftaran Dibuka" },
   ],
+  metricsButtonLabel: "Daftar Sekarang",
+  metricsButtonHref: "/spmb",
   pillarsHeading: "Lingkungan Belajar yang Profesional",
   pillars: [
     {
@@ -249,6 +331,10 @@ const fallbackHomepageSettings: HomepageSettings = {
   ctaTitlePrefix: "Bergabung Bersama",
   ctaDescription:
     "Mulai perjalanan belajar dengan sistem yang adaptif, dukungan guru berpengalaman, dan program praktik yang selaras dengan kebutuhan industri.",
+  ctaPrimaryButtonLabel: "Info SPMB",
+  ctaPrimaryButtonHref: "/spmb",
+  ctaSecondaryButtonLabel: "Kelola Konten Sekolah",
+  ctaSecondaryButtonHref: "/studio",
 };
 
 const fallbackPartnerSettings: PartnerSettings = {
@@ -261,6 +347,73 @@ const fallbackPartnerSettings: PartnerSettings = {
     { name: "Portal Sekolah Kreatif", category: "media", logoUrl: "/logo-smk.svg" },
     { name: "Mitra Mekatronik Nasional", category: "company", logoUrl: "/logo-smk.svg" },
   ],
+};
+
+const fallbackTahfidzSettings: TahfidzSettings = {
+  heroBadge: "Program Unggulan Keislaman",
+  heroTitle: "Program Tahfidzul Qur'an",
+  heroDescription:
+    "Program pembinaan hafalan Al-Qur'an untuk membentuk siswa berakhlak mulia, disiplin, dan mencintai Al-Qur'an melalui bimbingan musyrif yang terarah.",
+  heroImageUrl: "/hero-sekolah.svg",
+  heroImageAlt: "Kegiatan tahfidz siswa",
+  targetHafalan: "3-5 Juz selama masa studi",
+  programPoints: [
+    "Tahsin dan tahfidz harian dengan metode talaqqi",
+    "Setoran hafalan terjadwal per pekan",
+    "Murojaah berkelanjutan untuk menjaga kualitas hafalan",
+    "Pembinaan adab penuntut ilmu dan akhlak Qur'ani",
+  ],
+  scheduleItems: [
+    "Senin-Kamis: Setoran hafalan setelah kegiatan belajar",
+    "Jumat: Murojaah bersama dan evaluasi pekanan",
+    "Sabtu: Kelas penguatan tajwid dan makhraj",
+  ],
+  benefits: [
+    "Meningkatkan kedisiplinan dan fokus belajar",
+    "Membentuk karakter religius dan tanggung jawab",
+    "Menambah bekal spiritual dan kepercayaan diri siswa",
+    "Mendapat pendampingan hafalan secara berkala",
+  ],
+  ctaTitle: "Ingin Bergabung Program Tahfidz?",
+  ctaDescription:
+    "Silakan hubungi sekolah untuk informasi pendaftaran dan mekanisme pembinaan Program Tahfidzul Qur'an.",
+};
+
+const fallbackSpmbSettings: SpmbSettings = {
+  heroBadge: "Penerimaan Murid Baru",
+  heroTitle: "Informasi SPMB",
+  heroDescription:
+    "Selamat datang di halaman resmi SPMB. Temukan informasi lengkap seputar pendaftaran, persyaratan, alur, jadwal, dan kontak panitia.",
+  registrationInfo: [
+    "SPMB dibuka untuk lulusan SMP/MTs atau sederajat.",
+    "Pendaftaran dapat dilakukan secara online maupun datang langsung ke sekolah.",
+    "Calon murid dapat memilih program keahlian sesuai minat dan bakat.",
+  ],
+  requirements: [
+    "Fotokopi ijazah/SKL SMP/MTs (jika sudah tersedia).",
+    "Fotokopi Kartu Keluarga.",
+    "Fotokopi Akta Kelahiran.",
+    "Pas foto terbaru ukuran 3x4 (2 lembar).",
+    "Mengisi formulir pendaftaran SPMB.",
+  ],
+  registrationFlow: [
+    "Mengisi formulir pendaftaran.",
+    "Melengkapi dan mengumpulkan berkas persyaratan.",
+    "Verifikasi berkas oleh panitia SPMB.",
+    "Mengikuti tes/wawancara sesuai ketentuan sekolah.",
+    "Pengumuman hasil seleksi.",
+    "Daftar ulang bagi calon murid yang dinyatakan diterima.",
+  ],
+  scheduleItems: [
+    "Gelombang 1: Januari - Maret",
+    "Gelombang 2: April - Juni",
+    "Seleksi dan wawancara: mengikuti jadwal dari panitia",
+    "Pengumuman hasil: maksimal 7 hari setelah seleksi",
+    "Daftar ulang: sesuai batas waktu yang ditetapkan",
+  ],
+  ctaTitle: "Butuh Bantuan Pendaftaran?",
+  ctaDescription:
+    "Tim panitia SPMB siap membantu Anda terkait alur pendaftaran, berkas, dan jadwal seleksi.",
 };
 
 const fallbackProfileSettings: ProfileSettings = {
@@ -369,12 +522,23 @@ export const getHomepageSettings = cache(
         heroBadge: data?.heroBadge || fallbackHomepageSettings.heroBadge,
         heroTitlePrefix: data?.heroTitlePrefix || fallbackHomepageSettings.heroTitlePrefix,
         heroDescription: data?.heroDescription || fallbackHomepageSettings.heroDescription,
+        heroPrimaryButtonLabel:
+          data?.heroPrimaryButtonLabel || fallbackHomepageSettings.heroPrimaryButtonLabel,
+        heroPrimaryButtonHref:
+          data?.heroPrimaryButtonHref || fallbackHomepageSettings.heroPrimaryButtonHref,
+        heroSecondaryButtonLabel:
+          data?.heroSecondaryButtonLabel || fallbackHomepageSettings.heroSecondaryButtonLabel,
+        heroSecondaryButtonHref:
+          data?.heroSecondaryButtonHref || fallbackHomepageSettings.heroSecondaryButtonHref,
         heroFrameImageUrl:
           data?.heroFrameImageUrl || fallbackHomepageSettings.heroFrameImageUrl,
         heroFrameAlt: data?.heroFrameAlt || fallbackHomepageSettings.heroFrameAlt,
         metrics:
           data?.metrics?.filter((item) => item?.label && item?.value) ||
           fallbackHomepageSettings.metrics,
+        metricsButtonLabel:
+          data?.metricsButtonLabel || fallbackHomepageSettings.metricsButtonLabel,
+        metricsButtonHref: data?.metricsButtonHref || fallbackHomepageSettings.metricsButtonHref,
         pillarsHeading: data?.pillarsHeading || fallbackHomepageSettings.pillarsHeading,
         pillars:
           data?.pillars?.filter((item) => item?.title && item?.description) ||
@@ -384,6 +548,14 @@ export const getHomepageSettings = cache(
           fallbackHomepageSettings.galleryFrames,
         ctaTitlePrefix: data?.ctaTitlePrefix || fallbackHomepageSettings.ctaTitlePrefix,
         ctaDescription: data?.ctaDescription || fallbackHomepageSettings.ctaDescription,
+        ctaPrimaryButtonLabel:
+          data?.ctaPrimaryButtonLabel || fallbackHomepageSettings.ctaPrimaryButtonLabel,
+        ctaPrimaryButtonHref:
+          data?.ctaPrimaryButtonHref || fallbackHomepageSettings.ctaPrimaryButtonHref,
+        ctaSecondaryButtonLabel:
+          data?.ctaSecondaryButtonLabel || fallbackHomepageSettings.ctaSecondaryButtonLabel,
+        ctaSecondaryButtonHref:
+          data?.ctaSecondaryButtonHref || fallbackHomepageSettings.ctaSecondaryButtonHref,
       };
     } catch {
       return fallbackHomepageSettings;
@@ -413,6 +585,82 @@ export const getPartnerSettings = cache(
       };
     } catch {
       return fallbackPartnerSettings;
+    }
+  },
+);
+
+export const getTahfidzSettings = cache(
+  async function getTahfidzSettings(): Promise<TahfidzSettings> {
+    if (!sanityClient) {
+      return fallbackTahfidzSettings;
+    }
+
+    try {
+      const data = await sanityClient.fetch<Partial<TahfidzSettings> | null>(
+        tahfidzSettingsQuery,
+        {},
+        { next: { revalidate: 60 } },
+      );
+
+      return {
+        heroBadge: data?.heroBadge || fallbackTahfidzSettings.heroBadge,
+        heroTitle: data?.heroTitle || fallbackTahfidzSettings.heroTitle,
+        heroDescription: data?.heroDescription || fallbackTahfidzSettings.heroDescription,
+        heroImageUrl: data?.heroImageUrl ?? fallbackTahfidzSettings.heroImageUrl,
+        heroImageAlt: data?.heroImageAlt || fallbackTahfidzSettings.heroImageAlt,
+        targetHafalan: data?.targetHafalan || fallbackTahfidzSettings.targetHafalan,
+        programPoints:
+          data?.programPoints?.filter((item) => typeof item === "string" && item.length > 0) ||
+          fallbackTahfidzSettings.programPoints,
+        scheduleItems:
+          data?.scheduleItems?.filter((item) => typeof item === "string" && item.length > 0) ||
+          fallbackTahfidzSettings.scheduleItems,
+        benefits:
+          data?.benefits?.filter((item) => typeof item === "string" && item.length > 0) ||
+          fallbackTahfidzSettings.benefits,
+        ctaTitle: data?.ctaTitle || fallbackTahfidzSettings.ctaTitle,
+        ctaDescription: data?.ctaDescription || fallbackTahfidzSettings.ctaDescription,
+      };
+    } catch {
+      return fallbackTahfidzSettings;
+    }
+  },
+);
+
+export const getSpmbSettings = cache(
+  async function getSpmbSettings(): Promise<SpmbSettings> {
+    if (!sanityClient) {
+      return fallbackSpmbSettings;
+    }
+
+    try {
+      const data = await sanityClient.fetch<Partial<SpmbSettings> | null>(
+        spmbSettingsQuery,
+        {},
+        { next: { revalidate: 60 } },
+      );
+
+      return {
+        heroBadge: data?.heroBadge || fallbackSpmbSettings.heroBadge,
+        heroTitle: data?.heroTitle || fallbackSpmbSettings.heroTitle,
+        heroDescription: data?.heroDescription || fallbackSpmbSettings.heroDescription,
+        registrationInfo:
+          data?.registrationInfo?.filter((item) => typeof item === "string" && item.length > 0) ||
+          fallbackSpmbSettings.registrationInfo,
+        requirements:
+          data?.requirements?.filter((item) => typeof item === "string" && item.length > 0) ||
+          fallbackSpmbSettings.requirements,
+        registrationFlow:
+          data?.registrationFlow?.filter((item) => typeof item === "string" && item.length > 0) ||
+          fallbackSpmbSettings.registrationFlow,
+        scheduleItems:
+          data?.scheduleItems?.filter((item) => typeof item === "string" && item.length > 0) ||
+          fallbackSpmbSettings.scheduleItems,
+        ctaTitle: data?.ctaTitle || fallbackSpmbSettings.ctaTitle,
+        ctaDescription: data?.ctaDescription || fallbackSpmbSettings.ctaDescription,
+      };
+    } catch {
+      return fallbackSpmbSettings;
     }
   },
 );

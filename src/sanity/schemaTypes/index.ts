@@ -5,6 +5,8 @@ import { homepageSettingsType } from "./homepageSettingsType";
 import { partnerSettingsType } from "./partnerSettingsType";
 import { profileSettingsType } from "./profileSettingsType";
 import { siteSettingsType } from "./siteSettingsType";
+import { spmbSettingsType } from "./spmbSettingsType";
+import { tahfidzSettingsType } from "./tahfidzSettingsType";
 
 export const schemaTypes = [
   siteSettingsType,
@@ -14,4 +16,6 @@ export const schemaTypes = [
   profileSettingsType,
   articleType,
   concentrationType,
+  tahfidzSettingsType,
+  spmbSettingsType,
 ];

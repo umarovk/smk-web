@@ -39,6 +39,7 @@ export default function Navbar({
   const staticItems = [
     { href: "/", label: "Beranda" },
     { href: "/profil", label: "Profil" },
+    { href: "/tahfidz", label: "Program Tahfidz" },
   ];
 
   const trailingItems = [
@@ -162,12 +163,12 @@ export default function Navbar({
           )}
 
           <li className="ml-2">
-            <a
-              href="#ppdb"
+            <Link
+              href="/spmb"
               className="hover-shine inline-flex items-center rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm shadow-emerald-600/15 transition-all hover:bg-emerald-700"
             >
-              PPDB
-            </a>
+              SPMB
+            </Link>
           </li>
         </ul>
       </nav>
@@ -255,13 +256,13 @@ export default function Navbar({
           )}
 
           <li className="mt-1">
-            <a
-              href="#ppdb"
+            <Link
+              href="/spmb"
               className="block rounded-lg bg-emerald-600 px-4 py-2.5 text-center font-semibold text-white transition-colors hover:bg-emerald-700"
               onClick={() => setIsOpen(false)}
             >
-              PPDB
-            </a>
+              SPMB
+            </Link>
           </li>
         </ul>
       </div>
