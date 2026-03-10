@@ -49,6 +49,37 @@ export type PartnerSettings = {
   partners: PartnerItem[];
 };
 
+export type ProfileConcentration = {
+  name: string;
+  description: string;
+  imageUrl: string | null;
+  imageAlt: string;
+};
+
+export type ProfileGalleryPhoto = {
+  imageUrl: string;
+  alt: string;
+};
+
+export type ProfileSettings = {
+  heroImageUrl: string;
+  heroAlt: string;
+  profileDescription: string;
+  profileImageUrl: string | null;
+  profileImageAlt: string;
+  history: string;
+  historyImageUrl: string | null;
+  historyImageAlt: string;
+  vision: string;
+  missions: string[];
+  goals: string[];
+  concentrations: ProfileConcentration[];
+  galleryPhotos: ProfileGalleryPhoto[];
+  ctaBadge: string;
+  ctaTitle: string;
+  ctaDescription: string;
+};
+
 export type HomepageSettings = {
   heroBadge: string;
   heroTitlePrefix: string;
@@ -121,6 +152,35 @@ const partnerSettingsQuery = groq`
   }
 `;
 
+const profileSettingsQuery = groq`
+  *[_type == "profileSettings"] | order(_updatedAt desc)[0]{
+    "heroImageUrl": heroImage.asset->url,
+    heroAlt,
+    profileDescription,
+    "profileImageUrl": profileImage.asset->url,
+    profileImageAlt,
+    history,
+    "historyImageUrl": historyImage.asset->url,
+    historyImageAlt,
+    vision,
+    "missions": missions[].text,
+    "goals": goals[].text,
+    concentrations[]{
+      name,
+      description,
+      "imageUrl": image.asset->url,
+      imageAlt
+    },
+    galleryPhotos[]{
+      "imageUrl": image.asset->url,
+      alt
+    },
+    ctaBadge,
+    ctaTitle,
+    ctaDescription
+  }
+`;
+
 const fallbackSiteSettings: SiteSettings = {
   siteName: "SMK Web",
   logoUrl: "/logo-smk.svg",
@@ -188,6 +248,60 @@ const fallbackPartnerSettings: PartnerSettings = {
     { name: "Portal Sekolah Kreatif", category: "media", logoUrl: "/logo-smk.svg" },
     { name: "Mitra Mekatronik Nasional", category: "company", logoUrl: "/logo-smk.svg" },
   ],
+};
+
+const fallbackProfileSettings: ProfileSettings = {
+  heroImageUrl: "/hero-sekolah.svg",
+  heroAlt: "Gedung sekolah tampak depan",
+  profileDescription:
+    "SMK Web adalah sekolah menengah kejuruan yang berdedikasi pada pengembangan sumber daya manusia berkualitas melalui pendidikan vokasi berbasis industri. Dengan fasilitas modern dan tenaga pendidik profesional, kami menyiapkan lulusan yang siap menghadapi tantangan dunia kerja global. Sekolah kami mengedepankan keseimbangan antara penguasaan keterampilan teknis, karakter, dan kemampuan beradaptasi di era digital.",
+  profileImageUrl: "/foto-sekolah-1.svg",
+  profileImageAlt: "Suasana belajar di sekolah",
+  history:
+    "Didirikan pada tahun 2010, SMK Web bermula dari sebuah lembaga pelatihan keterampilan kecil yang berlokasi di pinggiran kota. Dengan semangat untuk meningkatkan kualitas pendidikan vokasi, para pendiri mendirikan sekolah ini dengan hanya dua program keahlian dan kurang dari 100 siswa. Seiring berjalannya waktu, dedikasi terhadap mutu pembelajaran dan kemitraan aktif dengan dunia industri membawa sekolah ini berkembang pesat. Kini, SMK Web telah menjadi salah satu SMK unggulan dengan ratusan siswa, fasilitas lengkap, serta jaringan alumni yang tersebar di berbagai perusahaan terkemuka.",
+  historyImageUrl: "/foto-sekolah-2.svg",
+  historyImageAlt: "Dokumentasi sejarah sekolah",
+  vision:
+    "Menjadi lembaga pendidikan vokasi unggulan yang menghasilkan lulusan berkarakter, terampil, dan berdaya saing global di era industri modern.",
+  missions: [
+    "Menyelenggarakan pembelajaran berbasis kompetensi yang relevan dengan kebutuhan dunia industri.",
+    "Membangun karakter siswa yang disiplin, jujur, dan bertanggung jawab melalui pembiasaan positif.",
+    "Menjalin kerja sama strategis dengan dunia usaha dan dunia industri untuk program magang dan sertifikasi.",
+    "Mengembangkan fasilitas dan teknologi pembelajaran yang adaptif terhadap perkembangan zaman.",
+    "Menciptakan lingkungan sekolah yang inklusif, aman, dan kondusif untuk belajar.",
+  ],
+  goals: [
+    "Meningkatkan kompetensi lulusan agar terserap minimal 85% di dunia kerja atau melanjutkan pendidikan tinggi.",
+    "Memperoleh akreditasi unggul dan pengakuan dari lembaga sertifikasi nasional maupun internasional.",
+    "Memperluas jaringan kemitraan industri hingga 50+ perusahaan mitra aktif.",
+    "Menghasilkan lulusan yang mampu berwirausaha dan menciptakan lapangan kerja baru.",
+  ],
+  concentrations: [
+    {
+      name: "Teknik Komputer & Jaringan (TKJ)",
+      description:
+        "Program keahlian yang mempelajari perakitan komputer, instalasi jaringan, administrasi server, dan keamanan siber. Siswa dibekali sertifikasi industri dan pengalaman magang di perusahaan IT.",
+      imageUrl: "/foto-sekolah-1.svg",
+      imageAlt: "Praktik laboratorium TKJ",
+    },
+    {
+      name: "Teknik Sepeda Motor (TSM)",
+      description:
+        "Program keahlian yang fokus pada perawatan, perbaikan, dan overhaul mesin sepeda motor. Dilengkapi bengkel standar industri dan kerja sama dengan pabrikan otomotif terkemuka.",
+      imageUrl: "/foto-sekolah-2.svg",
+      imageAlt: "Praktik bengkel TSM",
+    },
+  ],
+  galleryPhotos: [
+    { imageUrl: "/foto-sekolah-1.svg", alt: "Kegiatan belajar mengajar di kelas" },
+    { imageUrl: "/foto-sekolah-2.svg", alt: "Praktik di laboratorium komputer" },
+    { imageUrl: "/hero-sekolah.svg", alt: "Upacara bendera pagi hari" },
+    { imageUrl: "/foto-sekolah-1.svg", alt: "Kegiatan ekstrakurikuler" },
+  ],
+  ctaBadge: "Tertarik Bergabung?",
+  ctaTitle: "Daftarkan Diri Anda Sekarang",
+  ctaDescription:
+    "Bergabunglah bersama kami dan raih masa depan terbaik melalui pendidikan vokasi berkualitas.",
 };
 
 export const getSiteSettings = cache(async function getSiteSettings(): Promise<SiteSettings> {
@@ -302,6 +416,51 @@ export const getPartnerSettings = cache(
       };
     } catch {
       return fallbackPartnerSettings;
+    }
+  },
+);
+
+export const getProfileSettings = cache(
+  async function getProfileSettings(): Promise<ProfileSettings> {
+    if (!sanityClient) {
+      return fallbackProfileSettings;
+    }
+
+    try {
+      const data = await sanityClient.fetch<Partial<ProfileSettings> | null>(
+        profileSettingsQuery,
+        {},
+        { next: { revalidate: 60 } },
+      );
+
+      return {
+        heroImageUrl: data?.heroImageUrl || fallbackProfileSettings.heroImageUrl,
+        heroAlt: data?.heroAlt || fallbackProfileSettings.heroAlt,
+        profileDescription: data?.profileDescription || fallbackProfileSettings.profileDescription,
+        profileImageUrl: data?.profileImageUrl ?? fallbackProfileSettings.profileImageUrl,
+        profileImageAlt: data?.profileImageAlt || fallbackProfileSettings.profileImageAlt,
+        history: data?.history || fallbackProfileSettings.history,
+        historyImageUrl: data?.historyImageUrl ?? fallbackProfileSettings.historyImageUrl,
+        historyImageAlt: data?.historyImageAlt || fallbackProfileSettings.historyImageAlt,
+        vision: data?.vision || fallbackProfileSettings.vision,
+        missions:
+          data?.missions?.filter((m) => typeof m === "string" && m.length > 0) ||
+          fallbackProfileSettings.missions,
+        goals:
+          data?.goals?.filter((g) => typeof g === "string" && g.length > 0) ||
+          fallbackProfileSettings.goals,
+        concentrations:
+          data?.concentrations?.filter((c) => c?.name && c?.description) ||
+          fallbackProfileSettings.concentrations,
+        galleryPhotos:
+          data?.galleryPhotos?.filter((p) => p?.imageUrl && p?.alt) ||
+          fallbackProfileSettings.galleryPhotos,
+        ctaBadge: data?.ctaBadge || fallbackProfileSettings.ctaBadge,
+        ctaTitle: data?.ctaTitle || fallbackProfileSettings.ctaTitle,
+        ctaDescription: data?.ctaDescription || fallbackProfileSettings.ctaDescription,
+      };
+    } catch {
+      return fallbackProfileSettings;
     }
   },
 );
