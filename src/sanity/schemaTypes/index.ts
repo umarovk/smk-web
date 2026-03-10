@@ -1,3 +1,5 @@
+import { articleType } from "./articleType";
+import { concentrationType } from "./concentrationType";
 import { footerSettingsType } from "./footerSettingsType";
 import { homepageSettingsType } from "./homepageSettingsType";
 import { partnerSettingsType } from "./partnerSettingsType";
@@ -10,4 +12,6 @@ export const schemaTypes = [
   homepageSettingsType,
   partnerSettingsType,
   profileSettingsType,
+  articleType,
+  concentrationType,
 ];

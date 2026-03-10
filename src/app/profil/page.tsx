@@ -4,6 +4,7 @@ import Link from "next/link";
 import Footbar from "@/components/footbar";
 import Navbar from "@/components/navbar";
 import {
+  getConcentrations,
   getFooterSettings,
   getProfileSettings,
   getSiteSettings,
@@ -12,15 +13,16 @@ import {
 export const revalidate = 60;
 
 export default async function ProfilPage() {
-  const [schoolProfile, footerSettings, profile] = await Promise.all([
+  const [schoolProfile, footerSettings, profile, concentrations] = await Promise.all([
     getSiteSettings(),
     getFooterSettings(),
     getProfileSettings(),
+    getConcentrations(),
   ]);
 
   return (
     <div className="min-h-screen font-[family-name:var(--font-body)] text-[var(--foreground)]">
-      <Navbar siteName={schoolProfile.siteName} logoUrl={schoolProfile.logoUrl} />
+      <Navbar siteName={schoolProfile.siteName} logoUrl={schoolProfile.logoUrl} concentrations={concentrations} />
 
       <main className="mx-auto w-full max-w-6xl px-4 pb-24 pt-10 sm:px-6">
         {/* ════ HERO BANNER ════ */}
@@ -190,9 +192,10 @@ export default async function ProfilPage() {
           </div>
 
           <div className="grid gap-6 md:grid-cols-2">
-            {profile.concentrations.map((item) => (
-              <article
-                key={item.name}
+            {concentrations.map((item) => (
+              <Link
+                key={item.slug}
+                href={`/jurusan/${item.slug}`}
                 className="card-lift group overflow-hidden rounded-2xl border border-slate-100 bg-[var(--surface)]"
               >
                 {item.imageUrl && (
@@ -210,8 +213,12 @@ export default async function ProfilPage() {
                 <div className="p-6">
                   <h3 className="font-display text-lg font-bold text-slate-900">{item.name}</h3>
                   <p className="mt-2 text-sm leading-7 text-slate-500">{item.description}</p>
+                  <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-emerald-600">
+                    Lihat detail
+                    <svg width="12" height="12" viewBox="0 0 15 15" fill="none"><path d="M8.14 2.56a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L11.94 7.5 8.14 3.62a.75.75 0 0 1 0-1.06Z" fill="currentColor"/></svg>
+                  </span>
                 </div>
-              </article>
+              </Link>
             ))}
           </div>
         </section>

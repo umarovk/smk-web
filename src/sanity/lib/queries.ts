@@ -51,7 +51,12 @@ export type PartnerSettings = {
 
 export type ProfileConcentration = {
   name: string;
+  slug: string;
   description: string;
+  duration?: string;
+  competencyFocus?: string[];
+  careerProspects?: string[];
+  facilities?: string[];
   imageUrl: string | null;
   imageAlt: string;
 };
@@ -73,11 +78,25 @@ export type ProfileSettings = {
   vision: string;
   missions: string[];
   goals: string[];
-  concentrations: ProfileConcentration[];
   galleryPhotos: ProfileGalleryPhoto[];
   ctaBadge: string;
   ctaTitle: string;
   ctaDescription: string;
+};
+
+export type ArticleCard = {
+  slug: string;
+  title: string;
+  excerpt: string;
+  coverImageUrl: string;
+  coverImageAlt: string;
+  category: string;
+  author: string;
+  publishedAt: string;
+};
+
+export type Article = ArticleCard & {
+  body: unknown[];
 };
 
 export type HomepageSettings = {
@@ -165,12 +184,6 @@ const profileSettingsQuery = groq`
     vision,
     "missions": missions[].text,
     "goals": goals[].text,
-    concentrations[]{
-      name,
-      description,
-      "imageUrl": image.asset->url,
-      imageAlt
-    },
     galleryPhotos[]{
       "imageUrl": image.asset->url,
       alt
@@ -275,22 +288,6 @@ const fallbackProfileSettings: ProfileSettings = {
     "Memperoleh akreditasi unggul dan pengakuan dari lembaga sertifikasi nasional maupun internasional.",
     "Memperluas jaringan kemitraan industri hingga 50+ perusahaan mitra aktif.",
     "Menghasilkan lulusan yang mampu berwirausaha dan menciptakan lapangan kerja baru.",
-  ],
-  concentrations: [
-    {
-      name: "Teknik Komputer & Jaringan (TKJ)",
-      description:
-        "Program keahlian yang mempelajari perakitan komputer, instalasi jaringan, administrasi server, dan keamanan siber. Siswa dibekali sertifikasi industri dan pengalaman magang di perusahaan IT.",
-      imageUrl: "/foto-sekolah-1.svg",
-      imageAlt: "Praktik laboratorium TKJ",
-    },
-    {
-      name: "Teknik Sepeda Motor (TSM)",
-      description:
-        "Program keahlian yang fokus pada perawatan, perbaikan, dan overhaul mesin sepeda motor. Dilengkapi bengkel standar industri dan kerja sama dengan pabrikan otomotif terkemuka.",
-      imageUrl: "/foto-sekolah-2.svg",
-      imageAlt: "Praktik bengkel TSM",
-    },
   ],
   galleryPhotos: [
     { imageUrl: "/foto-sekolah-1.svg", alt: "Kegiatan belajar mengajar di kelas" },
@@ -449,9 +446,6 @@ export const getProfileSettings = cache(
         goals:
           data?.goals?.filter((g) => typeof g === "string" && g.length > 0) ||
           fallbackProfileSettings.goals,
-        concentrations:
-          data?.concentrations?.filter((c) => c?.name && c?.description) ||
-          fallbackProfileSettings.concentrations,
         galleryPhotos:
           data?.galleryPhotos?.filter((p) => p?.imageUrl && p?.alt) ||
           fallbackProfileSettings.galleryPhotos,
@@ -461,6 +455,325 @@ export const getProfileSettings = cache(
       };
     } catch {
       return fallbackProfileSettings;
+    }
+  },
+);
+
+export type NavConcentration = {
+  name: string;
+  slug: string;
+};
+
+const concentrationsListQuery = groq`
+  *[_type == "concentration"] | order(name asc){
+    name,
+    "slug": slug.current,
+    description,
+    duration,
+    competencyFocus,
+    careerProspects,
+    facilities,
+    "imageUrl": image.asset->url,
+    imageAlt
+  }
+`;
+
+const navConcentrationsQuery = groq`
+  *[_type == "concentration"] | order(name asc){
+    name,
+    "slug": slug.current
+  }
+`;
+
+const fallbackConcentrations: ProfileConcentration[] = [
+  {
+    name: "Teknik Komputer & Jaringan (TKJ)",
+    slug: "tkj",
+    description:
+      "Program keahlian yang mempelajari perakitan komputer, instalasi jaringan, administrasi server, dan keamanan siber. Siswa dibekali sertifikasi industri dan pengalaman magang di perusahaan IT.",
+    duration: "3 Tahun",
+    competencyFocus: [
+      "Instalasi dan konfigurasi jaringan",
+      "Administrasi server Linux dan Windows",
+      "Keamanan jaringan dasar",
+      "Troubleshooting perangkat komputer",
+    ],
+    careerProspects: [
+      "Network Administrator",
+      "IT Support Technician",
+      "Junior System Administrator",
+      "Technopreneur bidang jasa IT",
+    ],
+    facilities: [
+      "Laboratorium komputer",
+      "Perangkat jaringan praktik",
+      "Ruang simulasi server",
+    ],
+    imageUrl: "/foto-sekolah-1.svg",
+    imageAlt: "Praktik laboratorium TKJ",
+  },
+  {
+    name: "Teknik Sepeda Motor (TSM)",
+    slug: "tsm",
+    description:
+      "Program keahlian yang fokus pada perawatan, perbaikan, dan overhaul mesin sepeda motor. Dilengkapi bengkel standar industri dan kerja sama dengan pabrikan otomotif terkemuka.",
+    duration: "3 Tahun",
+    competencyFocus: [
+      "Perawatan berkala sepeda motor",
+      "Analisis kerusakan sistem mesin",
+      "Perbaikan sistem kelistrikan",
+      "Overhaul engine",
+    ],
+    careerProspects: [
+      "Teknisi bengkel resmi",
+      "Service advisor junior",
+      "Teknisi tim balap/pit",
+      "Wirausaha bengkel mandiri",
+    ],
+    facilities: [
+      "Bengkel praktik standar industri",
+      "Peralatan tuning dan service",
+      "Unit sepeda motor praktik",
+    ],
+    imageUrl: "/foto-sekolah-2.svg",
+    imageAlt: "Praktik bengkel TSM",
+  },
+];
+
+const fallbackNavConcentrations: NavConcentration[] = fallbackConcentrations.map((c) => ({
+  name: c.name,
+  slug: c.slug,
+}));
+
+export const getConcentrations = cache(
+  async function getConcentrations(): Promise<ProfileConcentration[]> {
+    if (!sanityClient) {
+      return fallbackConcentrations;
+    }
+
+    try {
+      const data = await sanityClient.fetch<ProfileConcentration[] | null>(
+        concentrationsListQuery,
+        {},
+        { next: { revalidate: 60 } },
+      );
+
+      const filtered = data?.filter((c) => c?.name && c?.slug && c?.description);
+      return filtered && filtered.length > 0 ? filtered : fallbackConcentrations;
+    } catch {
+      return fallbackConcentrations;
+    }
+  },
+);
+
+export const getNavConcentrations = cache(
+  async function getNavConcentrations(): Promise<NavConcentration[]> {
+    if (!sanityClient) {
+      return fallbackNavConcentrations;
+    }
+
+    try {
+      const data = await sanityClient.fetch<NavConcentration[] | null>(
+        navConcentrationsQuery,
+        {},
+        { next: { revalidate: 300 } },
+      );
+
+      const filtered = data?.filter((c) => c?.name && c?.slug);
+      return filtered && filtered.length > 0 ? filtered : fallbackNavConcentrations;
+    } catch {
+      return fallbackNavConcentrations;
+    }
+  },
+);
+
+const concentrationBySlugQuery = groq`
+  *[_type == "concentration" && slug.current == $slug][0]{
+    name,
+    "slug": slug.current,
+    description,
+    duration,
+    competencyFocus,
+    careerProspects,
+    facilities,
+    "imageUrl": image.asset->url,
+    imageAlt
+  }
+`;
+
+export const getConcentrationBySlug = cache(
+  async function getConcentrationBySlug(slug: string): Promise<ProfileConcentration | null> {
+    if (!sanityClient) {
+      return fallbackConcentrations.find((c) => c.slug === slug) ?? null;
+    }
+
+    try {
+      const data = await sanityClient.fetch<ProfileConcentration | null>(
+        concentrationBySlugQuery,
+        { slug },
+        { next: { revalidate: 60 } },
+      );
+
+      if (data?.name && data?.slug) return data;
+      return fallbackConcentrations.find((c) => c.slug === slug) ?? null;
+    } catch {
+      return fallbackConcentrations.find((c) => c.slug === slug) ?? null;
+    }
+  },
+);
+
+// ═══ ARTICLES ═══
+
+const articlesListQuery = groq`
+  *[_type == "article"] | order(publishedAt desc){
+    "slug": slug.current,
+    title,
+    excerpt,
+    "coverImageUrl": coverImage.asset->url,
+    coverImageAlt,
+    category,
+    author,
+    publishedAt
+  }
+`;
+
+const articleBySlugQuery = groq`
+  *[_type == "article" && slug.current == $slug][0]{
+    "slug": slug.current,
+    title,
+    excerpt,
+    "coverImageUrl": coverImage.asset->url,
+    coverImageAlt,
+    category,
+    author,
+    publishedAt,
+    body[]{
+      ...,
+      _type == "image" => {
+        ...,
+        "url": asset->url
+      }
+    }
+  }
+`;
+
+const fallbackArticles: ArticleCard[] = [
+  {
+    slug: "kunjungan-industri-2026",
+    title: "Kunjungan Industri ke PT Teknologi Nusantara",
+    excerpt:
+      "Siswa kelas XI mengikuti kunjungan industri ke PT Teknologi Nusantara untuk mengenal langsung lingkungan kerja dan proses produksi di dunia industri teknologi.",
+    coverImageUrl: "/foto-sekolah-1.svg",
+    coverImageAlt: "Kunjungan industri siswa",
+    category: "kegiatan",
+    author: "Admin",
+    publishedAt: "2026-02-15T08:00:00Z",
+  },
+  {
+    slug: "juara-lomba-kompetensi-siswa",
+    title: "Siswa TKJ Raih Juara 1 Lomba Kompetensi Tingkat Provinsi",
+    excerpt:
+      "Muhammad Fauzan, siswa kelas XII TKJ, berhasil meraih juara pertama dalam Lomba Kompetensi Siswa bidang IT Network Systems Administration tingkat provinsi.",
+    coverImageUrl: "/foto-sekolah-2.svg",
+    coverImageAlt: "Penyerahan piala juara",
+    category: "prestasi",
+    author: "Admin",
+    publishedAt: "2026-01-20T10:00:00Z",
+  },
+  {
+    slug: "pendaftaran-ppdb-2026",
+    title: "Pendaftaran Peserta Didik Baru Tahun Ajaran 2026/2027 Dibuka",
+    excerpt:
+      "Pendaftaran PPDB untuk tahun ajaran 2026/2027 resmi dibuka. Calon peserta didik dapat mendaftar secara online maupun offline mulai tanggal 1 Maret 2026.",
+    coverImageUrl: "/hero-sekolah.svg",
+    coverImageAlt: "Informasi PPDB",
+    category: "pengumuman",
+    author: "Admin",
+    publishedAt: "2026-01-05T07:00:00Z",
+  },
+];
+
+const fallbackArticleDetail: Article = {
+  ...fallbackArticles[0],
+  body: [
+    {
+      _type: "block",
+      _key: "fallback-1",
+      style: "normal",
+      children: [
+        {
+          _type: "span",
+          _key: "fallback-span-1",
+          text: "Pada hari Sabtu, 15 Februari 2026, sebanyak 60 siswa kelas XI dari program TKJ dan TSM melaksanakan kunjungan industri ke PT Teknologi Nusantara yang berlokasi di kawasan industri Cikarang. Kegiatan ini merupakan bagian dari program pembelajaran berbasis industri yang rutin dilaksanakan setiap tahun ajaran.",
+          marks: [],
+        },
+      ],
+      markDefs: [],
+    },
+    {
+      _type: "block",
+      _key: "fallback-2",
+      style: "normal",
+      children: [
+        {
+          _type: "span",
+          _key: "fallback-span-2",
+          text: "Selama kunjungan, para siswa mendapatkan kesempatan untuk melihat langsung proses produksi, berdiskusi dengan para engineer, serta memahami standar kerja yang diterapkan di dunia industri. Kegiatan ini diharapkan dapat memberikan motivasi dan gambaran nyata tentang dunia kerja yang akan mereka hadapi setelah lulus.",
+          marks: [],
+        },
+      ],
+      markDefs: [],
+    },
+  ],
+};
+
+export const getArticles = cache(
+  async function getArticles(): Promise<ArticleCard[]> {
+    if (!sanityClient) {
+      return fallbackArticles;
+    }
+
+    try {
+      const data = await sanityClient.fetch<ArticleCard[] | null>(
+        articlesListQuery,
+        {},
+        { next: { revalidate: 60 } },
+      );
+
+      const filtered = data?.filter((a) => a?.slug && a?.title && a?.coverImageUrl);
+      return filtered && filtered.length > 0 ? filtered : fallbackArticles;
+    } catch {
+      return fallbackArticles;
+    }
+  },
+);
+
+export const getArticleBySlug = cache(
+  async function getArticleBySlug(slug: string): Promise<Article | null> {
+    if (!sanityClient) {
+      return fallbackArticles.find((a) => a.slug === slug)
+        ? { ...fallbackArticleDetail, ...fallbackArticles.find((a) => a.slug === slug)!, body: fallbackArticleDetail.body }
+        : null;
+    }
+
+    try {
+      const data = await sanityClient.fetch<Article | null>(
+        articleBySlugQuery,
+        { slug },
+        { next: { revalidate: 60 } },
+      );
+
+      if (data?.slug && data?.title) return data;
+
+      const fallback = fallbackArticles.find((a) => a.slug === slug);
+      return fallback
+        ? { ...fallbackArticleDetail, ...fallback, body: fallbackArticleDetail.body }
+        : null;
+    } catch {
+      const fallback = fallbackArticles.find((a) => a.slug === slug);
+      return fallback
+        ? { ...fallbackArticleDetail, ...fallback, body: fallbackArticleDetail.body }
+        : null;
     }
   },
 );

@@ -117,52 +117,6 @@ export const profileSettingsType = defineType({
       validation: (rule) => rule.min(1).max(10),
     }),
     defineField({
-      name: "concentrations",
-      title: "Konsentrasi Keahlian",
-      type: "array",
-      of: [
-        defineField({
-          name: "concentrationItem",
-          title: "Konsentrasi",
-          type: "object",
-          fields: [
-            defineField({
-              name: "name",
-              title: "Nama Konsentrasi",
-              type: "string",
-              validation: (rule) => rule.required().min(3),
-            }),
-            defineField({
-              name: "description",
-              title: "Deskripsi",
-              type: "text",
-              rows: 3,
-              validation: (rule) => rule.required().min(20),
-            }),
-            defineField({
-              name: "image",
-              title: "Foto Konsentrasi",
-              type: "image",
-              options: { hotspot: true },
-            }),
-            defineField({
-              name: "imageAlt",
-              title: "Foto Alt Text",
-              type: "string",
-            }),
-          ],
-          preview: {
-            select: {
-              title: "name",
-              subtitle: "description",
-              media: "image",
-            },
-          },
-        }),
-      ],
-      validation: (rule) => rule.min(1).max(8),
-    }),
-    defineField({
       name: "ctaBadge",
       title: "CTA Badge",
       type: "string",

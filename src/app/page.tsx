@@ -6,6 +6,7 @@ import Navbar from "@/components/navbar";
 import {
   getFooterSettings,
   getHomepageSettings,
+  getNavConcentrations,
   getPartnerSettings,
   getSiteSettings,
 } from "@/sanity/lib/queries";
@@ -13,16 +14,21 @@ import {
 export const revalidate = 60;
 
 export default async function Home() {
-  const [schoolProfile, footerSettings, homepageSettings, partnerSettings] = await Promise.all([
+  const [schoolProfile, footerSettings, homepageSettings, partnerSettings, concentrations] = await Promise.all([
     getSiteSettings(),
     getFooterSettings(),
     getHomepageSettings(),
     getPartnerSettings(),
+    getNavConcentrations(),
   ]);
 
   return (
     <div className="min-h-screen bg-[var(--background)] font-[family-name:var(--font-body)] text-[var(--foreground)]">
-      <Navbar siteName={schoolProfile.siteName} logoUrl={schoolProfile.logoUrl} />
+      <Navbar
+        siteName={schoolProfile.siteName}
+        logoUrl={schoolProfile.logoUrl}
+        concentrations={concentrations}
+      />
 
       <main className="mx-auto w-full max-w-6xl px-4 pb-24 pt-10 sm:px-6">
         {/* ════ HERO ════ */}
