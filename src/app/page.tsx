@@ -1,5 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
+import type { Metadata } from "next";
+import { absoluteUrl, buildPageMetadata } from "@/lib/seo";
 
 import Footbar from "@/components/footbar";
 import Navbar from "@/components/navbar";
@@ -9,10 +11,27 @@ import {
   getNavbarSettings,
   getNavConcentrations,
   getPartnerSettings,
+  getSeoSettings,
   getSiteSettings,
 } from "@/sanity/lib/queries";
 
 export const revalidate = 60;
+
+export async function generateMetadata(): Promise<Metadata> {
+  const [homepageSettings, seoSettings] = await Promise.all([
+    getHomepageSettings(),
+    getSeoSettings(),
+  ]);
+
+  return buildPageMetadata({
+    title: homepageSettings.seoTitle || seoSettings.homeTitle || "Beranda",
+    description:
+      homepageSettings.seoDescription ||
+      seoSettings.homeDescription ||
+      seoSettings.defaultDescription,
+    path: "/",
+  });
+}
 
 export default async function Home() {
   const [schoolProfile, footerSettings, homepageSettings, partnerSettings, concentrations, navbarSettings] = await Promise.all([
@@ -23,6 +42,19 @@ export default async function Home() {
     getNavConcentrations(),
     getNavbarSettings(),
   ]);
+  const organizationJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "EducationalOrganization",
+    name: schoolProfile.siteName,
+    url: absoluteUrl("/"),
+    logo: schoolProfile.logoUrl || absoluteUrl("/logo-smk.svg"),
+    email: footerSettings.email,
+    telephone: footerSettings.phone,
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: footerSettings.address,
+    },
+  };
 
   return (
     <div className="min-h-screen bg-[var(--background)] font-[family-name:var(--font-body)] text-[var(--foreground)]">
@@ -34,6 +66,10 @@ export default async function Home() {
       />
 
       <main className="mx-auto w-full max-w-6xl px-4 pb-24 pt-10 sm:px-6">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+        />
         {/* ════ HERO ════ */}
         <section className="animate-fade-up relative overflow-hidden rounded-[1.75rem] bg-[var(--surface)]">
           <div className="absolute inset-0 dot-grid opacity-[0.035]" />

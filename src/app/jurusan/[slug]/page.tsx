@@ -1,14 +1,17 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 
 import Footbar from "@/components/footbar";
 import Navbar from "@/components/navbar";
+import { absoluteUrl } from "@/lib/seo";
 import {
   getConcentrationBySlug,
   getFooterSettings,
   getNavbarSettings,
   getNavConcentrations,
+  getSeoSettings,
   getSiteSettings,
 } from "@/sanity/lib/queries";
 
@@ -17,6 +20,37 @@ export const revalidate = 60;
 type PageProps = {
   params: Promise<{ slug: string }>;
 };
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const [concentration, seoSettings] = await Promise.all([
+    getConcentrationBySlug(slug),
+    getSeoSettings(),
+  ]);
+
+  if (!concentration) {
+    return {
+      title: "Jurusan",
+      description: seoSettings.profileDescription || seoSettings.defaultDescription,
+    };
+  }
+
+  const title = concentration.seoTitle || concentration.name;
+  const description = concentration.seoDescription || concentration.description;
+
+  return {
+    title,
+    description,
+    alternates: { canonical: absoluteUrl(`/jurusan/${slug}`) },
+    openGraph: {
+      title,
+      description,
+      url: absoluteUrl(`/jurusan/${slug}`),
+      images: concentration.imageUrl ? [{ url: concentration.imageUrl }] : undefined,
+      type: "article",
+    },
+  };
+}
 
 export default async function JurusanPage({ params }: PageProps) {
   const { slug } = await params;

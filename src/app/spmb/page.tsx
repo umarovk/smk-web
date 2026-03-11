@@ -1,5 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
+import type { Metadata } from "next";
+import { buildPageMetadata } from "@/lib/seo";
 
 import Footbar from "@/components/footbar";
 import Navbar from "@/components/navbar";
@@ -8,12 +10,22 @@ import {
   getFooterSettings,
   getNavbarSettings,
   getNavConcentrations,
+  getSeoSettings,
   getSiteSettings,
   getSpmbSettings,
   getTahfidzSettings,
 } from "@/sanity/lib/queries";
 
 export const revalidate = 60;
+
+export async function generateMetadata(): Promise<Metadata> {
+  const [spmb, seoSettings] = await Promise.all([getSpmbSettings(), getSeoSettings()]);
+  return buildPageMetadata({
+    title: spmb.seoTitle || seoSettings.spmbTitle || "SPMB",
+    description: spmb.seoDescription || seoSettings.spmbDescription || seoSettings.defaultDescription,
+    path: "/spmb",
+  });
+}
 
 function normalizePhone(phone: string) {
   const digits = phone.replace(/[^\d+]/g, "");
@@ -137,7 +149,7 @@ export default async function SpmbPage() {
 
         <section className="mt-8 rounded-2xl border border-slate-100 bg-[var(--surface)] p-6 sm:p-8">
           <p className="text-[0.65rem] font-bold uppercase tracking-[0.18em] text-emerald-600">
-            Program Tahfidzul Qur'an
+            Program Tahfidzul Qur&apos;an
           </p>
           <h2 className="font-display mt-2 text-2xl font-extrabold tracking-tight text-slate-900">
             {tahfidz.heroTitle}

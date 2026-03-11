@@ -68,6 +68,19 @@ export const concentrationType = defineType({
       title: "Foto Alt Text",
       type: "string",
     }),
+    defineField({
+      name: "seoTitle",
+      title: "SEO Title",
+      type: "string",
+      description: "Opsional, jika kosong akan memakai nama jurusan.",
+    }),
+    defineField({
+      name: "seoDescription",
+      title: "SEO Description",
+      type: "text",
+      rows: 2,
+      description: "Opsional, jika kosong akan memakai deskripsi jurusan.",
+    }),
   ],
   preview: {
     select: {

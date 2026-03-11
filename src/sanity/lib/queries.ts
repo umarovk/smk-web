@@ -2,6 +2,7 @@ import { groq } from "next-sanity";
 import { cache } from "react";
 
 import { sanityClient } from "@/sanity/lib/client";
+import { optimizeSanityImageUrl } from "@/sanity/lib/image";
 
 export type SiteSettings = {
   siteName: string;
@@ -66,6 +67,8 @@ export type ProfileConcentration = {
   name: string;
   slug: string;
   description: string;
+  seoTitle?: string;
+  seoDescription?: string;
   duration?: string;
   competencyFocus?: string[];
   careerProspects?: string[];
@@ -95,6 +98,8 @@ export type ProfileSettings = {
   ctaBadge: string;
   ctaTitle: string;
   ctaDescription: string;
+  seoTitle?: string;
+  seoDescription?: string;
 };
 
 export type ArticleCard = {
@@ -106,10 +111,14 @@ export type ArticleCard = {
   category: string;
   author: string;
   publishedAt: string;
+  seoTitle?: string;
+  seoDescription?: string;
 };
 
 export type Article = ArticleCard & {
   body: unknown[];
+  seoTitle?: string;
+  seoDescription?: string;
 };
 
 export type HomepageSettings = {
@@ -134,6 +143,8 @@ export type HomepageSettings = {
   ctaPrimaryButtonHref: string;
   ctaSecondaryButtonLabel: string;
   ctaSecondaryButtonHref: string;
+  seoTitle?: string;
+  seoDescription?: string;
 };
 
 export type TahfidzSettings = {
@@ -148,6 +159,8 @@ export type TahfidzSettings = {
   benefits: string[];
   ctaTitle: string;
   ctaDescription: string;
+  seoTitle?: string;
+  seoDescription?: string;
 };
 
 export type SpmbSettings = {
@@ -160,6 +173,26 @@ export type SpmbSettings = {
   scheduleItems: string[];
   ctaTitle: string;
   ctaDescription: string;
+  seoTitle?: string;
+  seoDescription?: string;
+};
+
+export type SeoSettings = {
+  siteTitle: string;
+  defaultDescription: string;
+  defaultOgImageUrl: string | null;
+  homeTitle?: string;
+  homeDescription?: string;
+  profileTitle?: string;
+  profileDescription?: string;
+  newsTitle?: string;
+  newsDescription?: string;
+  contactTitle?: string;
+  contactDescription?: string;
+  tahfidzTitle?: string;
+  tahfidzDescription?: string;
+  spmbTitle?: string;
+  spmbDescription?: string;
 };
 
 const siteSettingsQuery = groq`
@@ -198,6 +231,26 @@ const navbarSettingsQuery = groq`
   }
 `;
 
+const seoSettingsQuery = groq`
+  *[_type == "seoSettings"] | order(_updatedAt desc)[0]{
+    siteTitle,
+    defaultDescription,
+    "defaultOgImageUrl": defaultOgImage.asset->url,
+    homeTitle,
+    homeDescription,
+    profileTitle,
+    profileDescription,
+    newsTitle,
+    newsDescription,
+    contactTitle,
+    contactDescription,
+    tahfidzTitle,
+    tahfidzDescription,
+    spmbTitle,
+    spmbDescription
+  }
+`;
+
 const homepageSettingsQuery = groq`
   *[_type == "homepageSettings"] | order(_updatedAt desc)[0]{
     heroBadge,
@@ -229,7 +282,9 @@ const homepageSettingsQuery = groq`
     ctaPrimaryButtonLabel,
     ctaPrimaryButtonHref,
     ctaSecondaryButtonLabel,
-    ctaSecondaryButtonHref
+    ctaSecondaryButtonHref,
+    seoTitle,
+    seoDescription
   }
 `;
 
@@ -258,7 +313,9 @@ const tahfidzSettingsQuery = groq`
     scheduleItems,
     benefits,
     ctaTitle,
-    ctaDescription
+    ctaDescription,
+    seoTitle,
+    seoDescription
   }
 `;
 
@@ -272,7 +329,9 @@ const spmbSettingsQuery = groq`
     registrationFlow,
     scheduleItems,
     ctaTitle,
-    ctaDescription
+    ctaDescription,
+    seoTitle,
+    seoDescription
   }
 `;
 
@@ -295,7 +354,9 @@ const profileSettingsQuery = groq`
     },
     ctaBadge,
     ctaTitle,
-    ctaDescription
+    ctaDescription,
+    seoTitle,
+    seoDescription
   }
 `;
 
@@ -330,6 +391,30 @@ const fallbackNavbarSettings: NavbarSettings = {
   ],
   ctaLabel: "SPMB",
   ctaHref: "/spmb",
+};
+
+const fallbackSeoSettings: SeoSettings = {
+  siteTitle: "SMK Web",
+  defaultDescription: "Website resmi SMK berbasis Next.js dan Sanity.",
+  defaultOgImageUrl: "/hero-sekolah.svg",
+  homeTitle: "Beranda",
+  homeDescription:
+    "Portal resmi SMK berisi profil sekolah, jurusan, berita kegiatan, program tahfidz, dan informasi SPMB.",
+  profileTitle: "Profil Sekolah",
+  profileDescription:
+    "Informasi lengkap profil sekolah, sejarah, visi misi, tujuan, jurusan, dan galeri kegiatan.",
+  newsTitle: "Berita & Kegiatan",
+  newsDescription:
+    "Kumpulan berita terbaru, prestasi siswa, pengumuman, dan artikel kegiatan sekolah.",
+  contactTitle: "Kontak Sekolah",
+  contactDescription:
+    "Hubungi sekolah untuk informasi pendaftaran, program keahlian, dan layanan akademik.",
+  tahfidzTitle: "Program Tahfidzul Qur'an",
+  tahfidzDescription:
+    "Informasi program tahfidzul qur'an: target hafalan, jadwal pembinaan, dan manfaat program.",
+  spmbTitle: "SPMB",
+  spmbDescription:
+    "Informasi SPMB meliputi persyaratan, alur pendaftaran, jadwal, program keahlian, dan kontak panitia.",
 };
 
 const fallbackHomepageSettings: HomepageSettings = {
@@ -379,6 +464,9 @@ const fallbackHomepageSettings: HomepageSettings = {
   ctaPrimaryButtonHref: "/spmb",
   ctaSecondaryButtonLabel: "Kelola Konten Sekolah",
   ctaSecondaryButtonHref: "/studio",
+  seoTitle: "Beranda",
+  seoDescription:
+    "Portal resmi SMK berisi profil sekolah, jurusan, berita kegiatan, program tahfidz, dan informasi SPMB.",
 };
 
 const fallbackPartnerSettings: PartnerSettings = {
@@ -421,6 +509,9 @@ const fallbackTahfidzSettings: TahfidzSettings = {
   ctaTitle: "Ingin Bergabung Program Tahfidz?",
   ctaDescription:
     "Silakan hubungi sekolah untuk informasi pendaftaran dan mekanisme pembinaan Program Tahfidzul Qur'an.",
+  seoTitle: "Program Tahfidzul Qur'an",
+  seoDescription:
+    "Informasi program tahfidzul qur'an: target hafalan, jadwal pembinaan, dan manfaat program.",
 };
 
 const fallbackSpmbSettings: SpmbSettings = {
@@ -458,6 +549,9 @@ const fallbackSpmbSettings: SpmbSettings = {
   ctaTitle: "Butuh Bantuan Pendaftaran?",
   ctaDescription:
     "Tim panitia SPMB siap membantu Anda terkait alur pendaftaran, berkas, dan jadwal seleksi.",
+  seoTitle: "SPMB",
+  seoDescription:
+    "Informasi SPMB meliputi persyaratan, alur pendaftaran, jadwal, program keahlian, dan kontak panitia.",
 };
 
 const fallbackProfileSettings: ProfileSettings = {
@@ -496,6 +590,9 @@ const fallbackProfileSettings: ProfileSettings = {
   ctaTitle: "Daftarkan Diri Anda Sekarang",
   ctaDescription:
     "Bergabunglah bersama kami dan raih masa depan terbaik melalui pendidikan vokasi berkualitas.",
+  seoTitle: "Profil Sekolah",
+  seoDescription:
+    "Informasi lengkap profil sekolah, sejarah, visi misi, tujuan, jurusan, dan galeri kegiatan.",
 };
 
 export const getSiteSettings = cache(async function getSiteSettings(): Promise<SiteSettings> {
@@ -516,7 +613,9 @@ export const getSiteSettings = cache(async function getSiteSettings(): Promise<S
 
     return {
       siteName: data?.siteName || fallbackSiteSettings.siteName,
-      logoUrl: data?.logoUrl || fallbackSiteSettings.logoUrl,
+      logoUrl:
+        optimizeSanityImageUrl(data?.logoUrl, { width: 256, quality: 80 }) ||
+        fallbackSiteSettings.logoUrl,
     };
   } catch {
     return fallbackSiteSettings;
@@ -577,6 +676,42 @@ export const getNavbarSettings = cache(async function getNavbarSettings(): Promi
   }
 });
 
+export const getSeoSettings = cache(async function getSeoSettings(): Promise<SeoSettings> {
+  if (!sanityClient) {
+    return fallbackSeoSettings;
+  }
+
+  try {
+    const data = await sanityClient.fetch<Partial<SeoSettings> | null>(
+      seoSettingsQuery,
+      {},
+      { next: { revalidate: 60 } },
+    );
+
+    return {
+      siteTitle: data?.siteTitle || fallbackSeoSettings.siteTitle,
+      defaultDescription: data?.defaultDescription || fallbackSeoSettings.defaultDescription,
+      defaultOgImageUrl:
+        optimizeSanityImageUrl(data?.defaultOgImageUrl, { width: 1200, quality: 80 }) ||
+        fallbackSeoSettings.defaultOgImageUrl,
+      homeTitle: data?.homeTitle || fallbackSeoSettings.homeTitle,
+      homeDescription: data?.homeDescription || fallbackSeoSettings.homeDescription,
+      profileTitle: data?.profileTitle || fallbackSeoSettings.profileTitle,
+      profileDescription: data?.profileDescription || fallbackSeoSettings.profileDescription,
+      newsTitle: data?.newsTitle || fallbackSeoSettings.newsTitle,
+      newsDescription: data?.newsDescription || fallbackSeoSettings.newsDescription,
+      contactTitle: data?.contactTitle || fallbackSeoSettings.contactTitle,
+      contactDescription: data?.contactDescription || fallbackSeoSettings.contactDescription,
+      tahfidzTitle: data?.tahfidzTitle || fallbackSeoSettings.tahfidzTitle,
+      tahfidzDescription: data?.tahfidzDescription || fallbackSeoSettings.tahfidzDescription,
+      spmbTitle: data?.spmbTitle || fallbackSeoSettings.spmbTitle,
+      spmbDescription: data?.spmbDescription || fallbackSeoSettings.spmbDescription,
+    };
+  } catch {
+    return fallbackSeoSettings;
+  }
+});
+
 export const getHomepageSettings = cache(
   async function getHomepageSettings(): Promise<HomepageSettings> {
     if (!sanityClient) {
@@ -603,7 +738,8 @@ export const getHomepageSettings = cache(
         heroSecondaryButtonHref:
           data?.heroSecondaryButtonHref || fallbackHomepageSettings.heroSecondaryButtonHref,
         heroFrameImageUrl:
-          data?.heroFrameImageUrl || fallbackHomepageSettings.heroFrameImageUrl,
+          optimizeSanityImageUrl(data?.heroFrameImageUrl, { width: 1600, quality: 75 }) ||
+          fallbackHomepageSettings.heroFrameImageUrl,
         heroFrameAlt: data?.heroFrameAlt || fallbackHomepageSettings.heroFrameAlt,
         metrics:
           data?.metrics?.filter((item) => item?.label && item?.value) ||
@@ -616,8 +752,14 @@ export const getHomepageSettings = cache(
           data?.pillars?.filter((item) => item?.title && item?.description) ||
           fallbackHomepageSettings.pillars,
         galleryFrames:
-          data?.galleryFrames?.filter((item) => item?.imageUrl && item?.alt) ||
-          fallbackHomepageSettings.galleryFrames,
+          data?.galleryFrames
+            ?.filter((item) => item?.imageUrl && item?.alt)
+            ?.map((item) => ({
+              ...item,
+              imageUrl:
+                optimizeSanityImageUrl(item.imageUrl, { width: 1200, quality: 75 }) ||
+                item.imageUrl,
+            })) || fallbackHomepageSettings.galleryFrames,
         ctaTitlePrefix: data?.ctaTitlePrefix || fallbackHomepageSettings.ctaTitlePrefix,
         ctaDescription: data?.ctaDescription || fallbackHomepageSettings.ctaDescription,
         ctaPrimaryButtonLabel:
@@ -628,6 +770,8 @@ export const getHomepageSettings = cache(
           data?.ctaSecondaryButtonLabel || fallbackHomepageSettings.ctaSecondaryButtonLabel,
         ctaSecondaryButtonHref:
           data?.ctaSecondaryButtonHref || fallbackHomepageSettings.ctaSecondaryButtonHref,
+        seoTitle: data?.seoTitle || fallbackHomepageSettings.seoTitle,
+        seoDescription: data?.seoDescription || fallbackHomepageSettings.seoDescription,
       };
     } catch {
       return fallbackHomepageSettings;
@@ -652,8 +796,14 @@ export const getPartnerSettings = cache(
         heading: data?.heading || fallbackPartnerSettings.heading,
         description: data?.description || fallbackPartnerSettings.description,
         partners:
-          data?.partners?.filter((item) => item?.name && item?.logoUrl && item?.category) ||
-          fallbackPartnerSettings.partners,
+          data?.partners
+            ?.filter((item) => item?.name && item?.logoUrl && item?.category)
+            ?.map((item) => ({
+              ...item,
+              logoUrl:
+                optimizeSanityImageUrl(item.logoUrl, { width: 256, quality: 80 }) ||
+                item.logoUrl,
+            })) || fallbackPartnerSettings.partners,
       };
     } catch {
       return fallbackPartnerSettings;
@@ -678,7 +828,9 @@ export const getTahfidzSettings = cache(
         heroBadge: data?.heroBadge || fallbackTahfidzSettings.heroBadge,
         heroTitle: data?.heroTitle || fallbackTahfidzSettings.heroTitle,
         heroDescription: data?.heroDescription || fallbackTahfidzSettings.heroDescription,
-        heroImageUrl: data?.heroImageUrl ?? fallbackTahfidzSettings.heroImageUrl,
+        heroImageUrl:
+          optimizeSanityImageUrl(data?.heroImageUrl, { width: 1400, quality: 75 }) ??
+          fallbackTahfidzSettings.heroImageUrl,
         heroImageAlt: data?.heroImageAlt || fallbackTahfidzSettings.heroImageAlt,
         targetHafalan: data?.targetHafalan || fallbackTahfidzSettings.targetHafalan,
         programPoints:
@@ -692,6 +844,8 @@ export const getTahfidzSettings = cache(
           fallbackTahfidzSettings.benefits,
         ctaTitle: data?.ctaTitle || fallbackTahfidzSettings.ctaTitle,
         ctaDescription: data?.ctaDescription || fallbackTahfidzSettings.ctaDescription,
+        seoTitle: data?.seoTitle || fallbackTahfidzSettings.seoTitle,
+        seoDescription: data?.seoDescription || fallbackTahfidzSettings.seoDescription,
       };
     } catch {
       return fallbackTahfidzSettings;
@@ -730,6 +884,8 @@ export const getSpmbSettings = cache(
           fallbackSpmbSettings.scheduleItems,
         ctaTitle: data?.ctaTitle || fallbackSpmbSettings.ctaTitle,
         ctaDescription: data?.ctaDescription || fallbackSpmbSettings.ctaDescription,
+        seoTitle: data?.seoTitle || fallbackSpmbSettings.seoTitle,
+        seoDescription: data?.seoDescription || fallbackSpmbSettings.seoDescription,
       };
     } catch {
       return fallbackSpmbSettings;
@@ -751,13 +907,19 @@ export const getProfileSettings = cache(
       );
 
       return {
-        heroImageUrl: data?.heroImageUrl || fallbackProfileSettings.heroImageUrl,
+        heroImageUrl:
+          optimizeSanityImageUrl(data?.heroImageUrl, { width: 1600, quality: 75 }) ||
+          fallbackProfileSettings.heroImageUrl,
         heroAlt: data?.heroAlt || fallbackProfileSettings.heroAlt,
         profileDescription: data?.profileDescription || fallbackProfileSettings.profileDescription,
-        profileImageUrl: data?.profileImageUrl ?? fallbackProfileSettings.profileImageUrl,
+        profileImageUrl:
+          optimizeSanityImageUrl(data?.profileImageUrl, { width: 1200, quality: 75 }) ??
+          fallbackProfileSettings.profileImageUrl,
         profileImageAlt: data?.profileImageAlt || fallbackProfileSettings.profileImageAlt,
         history: data?.history || fallbackProfileSettings.history,
-        historyImageUrl: data?.historyImageUrl ?? fallbackProfileSettings.historyImageUrl,
+        historyImageUrl:
+          optimizeSanityImageUrl(data?.historyImageUrl, { width: 1200, quality: 75 }) ??
+          fallbackProfileSettings.historyImageUrl,
         historyImageAlt: data?.historyImageAlt || fallbackProfileSettings.historyImageAlt,
         vision: data?.vision || fallbackProfileSettings.vision,
         missions:
@@ -767,11 +929,18 @@ export const getProfileSettings = cache(
           data?.goals?.filter((g) => typeof g === "string" && g.length > 0) ||
           fallbackProfileSettings.goals,
         galleryPhotos:
-          data?.galleryPhotos?.filter((p) => p?.imageUrl && p?.alt) ||
-          fallbackProfileSettings.galleryPhotos,
+          data?.galleryPhotos
+            ?.filter((p) => p?.imageUrl && p?.alt)
+            ?.map((p) => ({
+              ...p,
+              imageUrl:
+                optimizeSanityImageUrl(p.imageUrl, { width: 1200, quality: 75 }) || p.imageUrl,
+            })) || fallbackProfileSettings.galleryPhotos,
         ctaBadge: data?.ctaBadge || fallbackProfileSettings.ctaBadge,
         ctaTitle: data?.ctaTitle || fallbackProfileSettings.ctaTitle,
         ctaDescription: data?.ctaDescription || fallbackProfileSettings.ctaDescription,
+        seoTitle: data?.seoTitle || fallbackProfileSettings.seoTitle,
+        seoDescription: data?.seoDescription || fallbackProfileSettings.seoDescription,
       };
     } catch {
       return fallbackProfileSettings;
@@ -789,6 +958,8 @@ const concentrationsListQuery = groq`
     name,
     "slug": slug.current,
     description,
+    seoTitle,
+    seoDescription,
     duration,
     competencyFocus,
     careerProspects,
@@ -811,6 +982,9 @@ const fallbackConcentrations: ProfileConcentration[] = [
     slug: "tkj",
     description:
       "Program keahlian yang mempelajari perakitan komputer, instalasi jaringan, administrasi server, dan keamanan siber. Siswa dibekali sertifikasi industri dan pengalaman magang di perusahaan IT.",
+    seoTitle: "Jurusan TKJ",
+    seoDescription:
+      "Detail jurusan TKJ: fokus kompetensi, prospek karier, fasilitas, dan profil program.",
     duration: "3 Tahun",
     competencyFocus: [
       "Instalasi dan konfigurasi jaringan",
@@ -837,6 +1011,9 @@ const fallbackConcentrations: ProfileConcentration[] = [
     slug: "tsm",
     description:
       "Program keahlian yang fokus pada perawatan, perbaikan, dan overhaul mesin sepeda motor. Dilengkapi bengkel standar industri dan kerja sama dengan pabrikan otomotif terkemuka.",
+    seoTitle: "Jurusan TSM",
+    seoDescription:
+      "Detail jurusan TSM: fokus kompetensi, prospek karier, fasilitas, dan profil program.",
     duration: "3 Tahun",
     competencyFocus: [
       "Perawatan berkala sepeda motor",
@@ -878,7 +1055,13 @@ export const getConcentrations = cache(
         { next: { revalidate: 60 } },
       );
 
-      const filtered = data?.filter((c) => c?.name && c?.slug && c?.description);
+      const filtered = data
+        ?.filter((c) => c?.name && c?.slug && c?.description)
+        ?.map((c) => ({
+          ...c,
+          imageUrl:
+            optimizeSanityImageUrl(c.imageUrl, { width: 1200, quality: 75 }) || c.imageUrl,
+        }));
       return filtered && filtered.length > 0 ? filtered : fallbackConcentrations;
     } catch {
       return fallbackConcentrations;
@@ -912,6 +1095,8 @@ const concentrationBySlugQuery = groq`
     name,
     "slug": slug.current,
     description,
+    seoTitle,
+    seoDescription,
     duration,
     competencyFocus,
     careerProspects,
@@ -934,7 +1119,13 @@ export const getConcentrationBySlug = cache(
         { next: { revalidate: 60 } },
       );
 
-      if (data?.name && data?.slug) return data;
+      if (data?.name && data?.slug) {
+        return {
+          ...data,
+          imageUrl:
+            optimizeSanityImageUrl(data.imageUrl, { width: 1400, quality: 75 }) || data.imageUrl,
+        };
+      }
       return fallbackConcentrations.find((c) => c.slug === slug) ?? null;
     } catch {
       return fallbackConcentrations.find((c) => c.slug === slug) ?? null;
@@ -949,6 +1140,8 @@ const articlesListQuery = groq`
     "slug": slug.current,
     title,
     excerpt,
+    seoTitle,
+    seoDescription,
     "coverImageUrl": coverImage.asset->url,
     coverImageAlt,
     category,
@@ -962,6 +1155,8 @@ const articleBySlugQuery = groq`
     "slug": slug.current,
     title,
     excerpt,
+    seoTitle,
+    seoDescription,
     "coverImageUrl": coverImage.asset->url,
     coverImageAlt,
     category,
@@ -988,6 +1183,9 @@ const fallbackArticles: ArticleCard[] = [
     category: "kegiatan",
     author: "Admin",
     publishedAt: "2026-02-15T08:00:00Z",
+    seoTitle: "Kunjungan Industri 2026",
+    seoDescription:
+      "Berita kegiatan kunjungan industri siswa ke PT Teknologi Nusantara.",
   },
   {
     slug: "juara-lomba-kompetensi-siswa",
@@ -999,6 +1197,9 @@ const fallbackArticles: ArticleCard[] = [
     category: "prestasi",
     author: "Admin",
     publishedAt: "2026-01-20T10:00:00Z",
+    seoTitle: "Prestasi LKS TKJ Tingkat Provinsi",
+    seoDescription:
+      "Berita prestasi siswa TKJ meraih juara 1 lomba kompetensi tingkat provinsi.",
   },
   {
     slug: "pendaftaran-ppdb-2026",
@@ -1010,6 +1211,9 @@ const fallbackArticles: ArticleCard[] = [
     category: "pengumuman",
     author: "Admin",
     publishedAt: "2026-01-05T07:00:00Z",
+    seoTitle: "Pengumuman Pendaftaran SPMB 2026/2027",
+    seoDescription:
+      "Informasi resmi pembukaan pendaftaran SPMB tahun ajaran 2026/2027.",
   },
 ];
 
@@ -1047,6 +1251,19 @@ const fallbackArticleDetail: Article = {
   ],
 };
 
+function optimizeArticleBodyImages(body: unknown[] = []) {
+  return body.map((block) => {
+    if (block && typeof block === "object" && (block as { _type?: string })._type === "image") {
+      const imageBlock = block as { url?: string };
+      return {
+        ...block,
+        url: optimizeSanityImageUrl(imageBlock.url, { width: 1400, quality: 75 }),
+      };
+    }
+    return block;
+  });
+}
+
 export const getArticles = cache(
   async function getArticles(): Promise<ArticleCard[]> {
     if (!sanityClient) {
@@ -1060,7 +1277,14 @@ export const getArticles = cache(
         { next: { revalidate: 60 } },
       );
 
-      const filtered = data?.filter((a) => a?.slug && a?.title && a?.coverImageUrl);
+      const filtered = data
+        ?.filter((a) => a?.slug && a?.title && a?.coverImageUrl)
+        ?.map((a) => ({
+          ...a,
+          coverImageUrl:
+            optimizeSanityImageUrl(a.coverImageUrl, { width: 1200, quality: 75 }) ||
+            a.coverImageUrl,
+        }));
       return filtered && filtered.length > 0 ? filtered : fallbackArticles;
     } catch {
       return fallbackArticles;
@@ -1083,7 +1307,15 @@ export const getArticleBySlug = cache(
         { next: { revalidate: 60 } },
       );
 
-      if (data?.slug && data?.title) return data;
+      if (data?.slug && data?.title) {
+        return {
+          ...data,
+          coverImageUrl:
+            optimizeSanityImageUrl(data.coverImageUrl, { width: 1600, quality: 75 }) ||
+            data.coverImageUrl,
+          body: optimizeArticleBodyImages(data.body),
+        };
+      }
 
       const fallback = fallbackArticles.find((a) => a.slug === slug);
       return fallback

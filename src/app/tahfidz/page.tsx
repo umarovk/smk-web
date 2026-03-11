@@ -1,5 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
+import type { Metadata } from "next";
+import { buildPageMetadata } from "@/lib/seo";
 
 import Footbar from "@/components/footbar";
 import Navbar from "@/components/navbar";
@@ -7,11 +9,28 @@ import {
   getFooterSettings,
   getNavbarSettings,
   getNavConcentrations,
+  getSeoSettings,
   getSiteSettings,
   getTahfidzSettings,
 } from "@/sanity/lib/queries";
 
 export const revalidate = 60;
+
+export async function generateMetadata(): Promise<Metadata> {
+  const [tahfidz, seoSettings] = await Promise.all([
+    getTahfidzSettings(),
+    getSeoSettings(),
+  ]);
+
+  return buildPageMetadata({
+    title: tahfidz.seoTitle || seoSettings.tahfidzTitle || "Program Tahfidzul Qur'an",
+    description:
+      tahfidz.seoDescription ||
+      seoSettings.tahfidzDescription ||
+      seoSettings.defaultDescription,
+    path: "/tahfidz",
+  });
+}
 
 export default async function TahfidzPage() {
   const [schoolProfile, footerSettings, concentrations, tahfidz, navbarSettings] = await Promise.all([

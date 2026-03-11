@@ -68,6 +68,19 @@ export const spmbSettingsType = defineType({
       rows: 3,
       validation: (rule) => rule.required().min(20),
     }),
+    defineField({
+      name: "seoTitle",
+      title: "SEO Title",
+      type: "string",
+      description: "Kosongkan jika ingin mengikuti default SEO global.",
+    }),
+    defineField({
+      name: "seoDescription",
+      title: "SEO Description",
+      type: "text",
+      rows: 2,
+      description: "Kosongkan jika ingin mengikuti default SEO global.",
+    }),
   ],
   preview: {
     prepare() {

@@ -1,4 +1,6 @@
 import Link from "next/link";
+import type { Metadata } from "next";
+import { buildPageMetadata } from "@/lib/seo";
 
 import Footbar from "@/components/footbar";
 import Navbar from "@/components/navbar";
@@ -6,10 +8,20 @@ import {
   getFooterSettings,
   getNavbarSettings,
   getNavConcentrations,
+  getSeoSettings,
   getSiteSettings,
 } from "@/sanity/lib/queries";
 
 export const revalidate = 60;
+
+export async function generateMetadata(): Promise<Metadata> {
+  const seoSettings = await getSeoSettings();
+  return buildPageMetadata({
+    title: seoSettings.contactTitle || "Kontak Sekolah",
+    description: seoSettings.contactDescription || seoSettings.defaultDescription,
+    path: "/kontak",
+  });
+}
 
 function normalizePhone(phone: string) {
   const digits = phone.replace(/[^\d+]/g, "");

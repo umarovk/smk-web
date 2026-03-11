@@ -143,6 +143,19 @@ export const profileSettingsType = defineType({
       validation: (rule) => rule.required().min(20),
     }),
     defineField({
+      name: "seoTitle",
+      title: "SEO Title",
+      type: "string",
+      description: "Kosongkan jika ingin mengikuti default SEO global.",
+    }),
+    defineField({
+      name: "seoDescription",
+      title: "SEO Description",
+      type: "text",
+      rows: 2,
+      description: "Kosongkan jika ingin mengikuti default SEO global.",
+    }),
+    defineField({
       name: "galleryPhotos",
       title: "Galeri Foto Sekolah",
       type: "array",

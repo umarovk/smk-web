@@ -1,16 +1,19 @@
 import { PortableText } from "@portabletext/react";
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import Footbar from "@/components/footbar";
 import Navbar from "@/components/navbar";
+import { absoluteUrl } from "@/lib/seo";
 import {
   getArticleBySlug,
   getArticles,
   getFooterSettings,
   getNavbarSettings,
   getNavConcentrations,
+  getSeoSettings,
   getSiteSettings,
 } from "@/sanity/lib/queries";
 
@@ -19,6 +22,41 @@ export const revalidate = 60;
 type PageProps = {
   params: Promise<{ slug: string }>;
 };
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const [article, seoSettings] = await Promise.all([getArticleBySlug(slug), getSeoSettings()]);
+
+  if (!article) {
+    return {
+      title: seoSettings.newsTitle || "Berita",
+      description: seoSettings.newsDescription || seoSettings.defaultDescription,
+    };
+  }
+
+  const title = article.seoTitle || article.title;
+  const description = article.seoDescription || article.excerpt;
+
+  return {
+    title,
+    description,
+    alternates: { canonical: absoluteUrl(`/berita/${slug}`) },
+    openGraph: {
+      title,
+      description,
+      url: absoluteUrl(`/berita/${slug}`),
+      images: article.coverImageUrl ? [{ url: article.coverImageUrl }] : undefined,
+      type: "article",
+      publishedTime: article.publishedAt,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: article.coverImageUrl ? [article.coverImageUrl] : undefined,
+    },
+  };
+}
 
 const categoryLabels: Record<string, string> = {
   kegiatan: "Kegiatan",
@@ -119,6 +157,19 @@ export default async function BeritaDetailPage({ params }: PageProps) {
   if (!article) notFound();
 
   const relatedArticles = allArticles.filter((a) => a.slug !== slug).slice(0, 3);
+  const articleJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "NewsArticle",
+    headline: article.title,
+    description: article.excerpt,
+    datePublished: article.publishedAt,
+    author: {
+      "@type": "Person",
+      name: article.author,
+    },
+    image: article.coverImageUrl ? [article.coverImageUrl] : [],
+    mainEntityOfPage: absoluteUrl(`/berita/${slug}`),
+  };
 
   return (
     <div className="min-h-screen font-[family-name:var(--font-body)] text-[var(--foreground)]">
@@ -131,6 +182,10 @@ export default async function BeritaDetailPage({ params }: PageProps) {
 
       <main className="mx-auto w-full max-w-6xl px-4 pb-24 pt-10 sm:px-6">
         {/* ════ HERO IMAGE ════ */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
+        />
         <section className="animate-fade-up relative h-56 overflow-hidden rounded-[1.75rem] sm:h-72 md:h-96">
           <Image
             src={article.coverImageUrl}

@@ -1,5 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
+import type { Metadata } from "next";
+import { buildPageMetadata } from "@/lib/seo";
 
 import Footbar from "@/components/footbar";
 import Navbar from "@/components/navbar";
@@ -8,10 +10,27 @@ import {
   getFooterSettings,
   getNavbarSettings,
   getProfileSettings,
+  getSeoSettings,
   getSiteSettings,
 } from "@/sanity/lib/queries";
 
 export const revalidate = 60;
+
+export async function generateMetadata(): Promise<Metadata> {
+  const [profileSettings, seoSettings] = await Promise.all([
+    getProfileSettings(),
+    getSeoSettings(),
+  ]);
+
+  return buildPageMetadata({
+    title: profileSettings.seoTitle || seoSettings.profileTitle || "Profil Sekolah",
+    description:
+      profileSettings.seoDescription ||
+      seoSettings.profileDescription ||
+      seoSettings.defaultDescription,
+    path: "/profil",
+  });
+}
 
 export default async function ProfilPage() {
   const [schoolProfile, footerSettings, profile, concentrations, navbarSettings] = await Promise.all([

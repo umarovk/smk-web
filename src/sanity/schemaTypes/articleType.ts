@@ -124,6 +124,19 @@ export const articleType = defineType({
       initialValue: () => new Date().toISOString(),
       validation: (rule) => rule.required(),
     }),
+    defineField({
+      name: "seoTitle",
+      title: "SEO Title",
+      type: "string",
+      description: "Opsional, jika kosong akan memakai judul artikel.",
+    }),
+    defineField({
+      name: "seoDescription",
+      title: "SEO Description",
+      type: "text",
+      rows: 2,
+      description: "Opsional, jika kosong akan memakai ringkasan artikel.",
+    }),
   ],
   orderings: [
     {

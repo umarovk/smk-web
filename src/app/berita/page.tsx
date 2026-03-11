@@ -1,5 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
+import type { Metadata } from "next";
+import { buildPageMetadata } from "@/lib/seo";
 
 import Footbar from "@/components/footbar";
 import Navbar from "@/components/navbar";
@@ -8,10 +10,20 @@ import {
   getFooterSettings,
   getNavbarSettings,
   getNavConcentrations,
+  getSeoSettings,
   getSiteSettings,
 } from "@/sanity/lib/queries";
 
 export const revalidate = 60;
+
+export async function generateMetadata(): Promise<Metadata> {
+  const seoSettings = await getSeoSettings();
+  return buildPageMetadata({
+    title: seoSettings.newsTitle || "Berita & Kegiatan",
+    description: seoSettings.newsDescription || seoSettings.defaultDescription,
+    path: "/berita",
+  });
+}
 
 const categoryLabels: Record<string, string> = {
   kegiatan: "Kegiatan",

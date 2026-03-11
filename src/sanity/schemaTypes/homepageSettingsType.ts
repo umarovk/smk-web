@@ -226,6 +226,19 @@ export const homepageSettingsType = defineType({
             initialValue: "/studio",
             validation: (rule) => rule.required(),
         }),
+        defineField({
+            name: "seoTitle",
+            title: "SEO Title",
+            type: "string",
+            description: "Kosongkan jika ingin mengikuti default SEO global.",
+        }),
+        defineField({
+            name: "seoDescription",
+            title: "SEO Description",
+            type: "text",
+            rows: 2,
+            description: "Kosongkan jika ingin mengikuti default SEO global.",
+        }),
     ],
     preview: {
         prepare() {
