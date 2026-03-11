@@ -1,36 +1,158 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SMK Web
 
-## Getting Started
+Website profil sekolah berbasis Next.js App Router + Sanity CMS.
 
-First, run the development server:
+## System Requirements
+
+- OS: Windows 10/11, macOS, atau Linux
+- Node.js: 20.x atau lebih baru (LTS disarankan)
+- npm: 10.x atau lebih baru
+- Git: versi terbaru
+- Sanity project aktif (project ID + dataset)
+
+## Instalasi Lokal
+
+1) Clone repository
+
+```bash
+git clone <repo-url>
+cd smk-web
+```
+
+2) Install dependencies
+
+```bash
+npm install
+```
+
+3) Buat file env
+
+```bash
+cp .env.example .env.local
+```
+
+Untuk PowerShell:
+
+```powershell
+Copy-Item .env.example .env.local
+```
+
+4) Isi `.env.local`
+
+```env
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
+NEXT_PUBLIC_SANITY_PROJECT_ID=your_project_id
+NEXT_PUBLIC_SANITY_DATASET=production
+NEXT_PUBLIC_SANITY_API_VERSION=2026-03-08
+SANITY_API_WRITE_TOKEN=your_write_token
+SANITY_REVALIDATE_SECRET=your_random_secret
+```
+
+5) Jalankan development server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- App: `http://localhost:3000`
+- Studio: `http://localhost:3000/studio`
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `npm run dev` - jalankan mode development
+- `npm run build` - build production
+- `npm run start` - jalankan hasil build
+- `npm run lint` - cek lint
 
-## Learn More
+## Tutorial Deploy
 
-To learn more about Next.js, take a look at the following resources:
+### Opsi A: Deploy ke Vercel (paling mudah)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1) Push project ke GitHub/GitLab/Bitbucket.
+2) Login ke Vercel, klik **Add New Project**.
+3) Import repository `smk-web`.
+4) Set Environment Variables di Vercel:
+   - `NEXT_PUBLIC_SITE_URL=https://domain-kamu.com`
+   - `NEXT_PUBLIC_SANITY_PROJECT_ID=...`
+   - `NEXT_PUBLIC_SANITY_DATASET=production`
+   - `NEXT_PUBLIC_SANITY_API_VERSION=2026-03-08`
+   - `SANITY_API_WRITE_TOKEN=...`
+   - `SANITY_REVALIDATE_SECRET=...`
+5) Klik **Deploy**.
+6) Setelah live, cek:
+   - `https://domain-kamu.com`
+   - `https://domain-kamu.com/studio`
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Opsi B: Deploy ke VPS (Node.js server)
 
-## Deploy on Vercel
+1) Install Node.js 20+ di server.
+2) Clone repo di server.
+3) Buat `.env.local` (isi sama seperti production).
+4) Install dependency:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+npm install
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+5) Build:
+
+```bash
+npm run build
+```
+
+6) Jalankan app:
+
+```bash
+npm run start
+```
+
+7) (Disarankan) pakai PM2 agar auto-restart:
+
+```bash
+npm i -g pm2
+pm2 start npm --name smk-web -- start
+pm2 save
+```
+
+8) Pasang reverse proxy Nginx ke port app (default 3000) + SSL.
+
+## Setup Webhook Sanity (realtime update cache)
+
+Tanpa webhook, konten tetap update tapi menunggu cache revalidate periodik.  
+Dengan webhook, update dari Sanity bisa muncul lebih cepat.
+
+1) Buka Sanity Manage -> Project -> API -> Webhooks.
+2) Create webhook:
+   - Method: `POST`
+   - URL: `https://domain-kamu.com/api/revalidate?secret=SANITY_REVALIDATE_SECRET`
+   - Trigger: Create, Update, Delete
+3) Filter (opsional):
+
+```groq
+_type in [
+  "homepageSettings",
+  "profileSettings",
+  "tahfidzSettings",
+  "spmbSettings",
+  "seoSettings",
+  "navbarSettings",
+  "footerSettings",
+  "article",
+  "concentration"
+]
+```
+
+4) Payload:
+
+```json
+{
+  "_type": _type,
+  "slug": slug.current
+}
+```
+
+## Notes
+
+- Pastikan `NEXT_PUBLIC_SITE_URL` selalu sesuai domain production.
+- Setiap ubah env di hosting, lakukan redeploy.
+- Jangan commit file `.env.local` ke repository.
