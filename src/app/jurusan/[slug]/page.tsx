@@ -7,6 +7,7 @@ import Navbar from "@/components/navbar";
 import {
   getConcentrationBySlug,
   getFooterSettings,
+  getNavbarSettings,
   getNavConcentrations,
   getSiteSettings,
 } from "@/sanity/lib/queries";
@@ -20,11 +21,12 @@ type PageProps = {
 export default async function JurusanPage({ params }: PageProps) {
   const { slug } = await params;
 
-  const [schoolProfile, footerSettings, concentration, concentrations] = await Promise.all([
+  const [schoolProfile, footerSettings, concentration, concentrations, navbarSettings] = await Promise.all([
     getSiteSettings(),
     getFooterSettings(),
     getConcentrationBySlug(slug),
     getNavConcentrations(),
+    getNavbarSettings(),
   ]);
 
   if (!concentration) notFound();
@@ -37,6 +39,7 @@ export default async function JurusanPage({ params }: PageProps) {
         siteName={schoolProfile.siteName}
         logoUrl={schoolProfile.logoUrl}
         concentrations={concentrations}
+        navbarSettings={navbarSettings}
       />
 
       <main className="mx-auto w-full max-w-6xl px-4 pb-24 pt-10 sm:px-6">

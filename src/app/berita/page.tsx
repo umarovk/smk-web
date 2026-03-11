@@ -6,6 +6,7 @@ import Navbar from "@/components/navbar";
 import {
   getArticles,
   getFooterSettings,
+  getNavbarSettings,
   getNavConcentrations,
   getSiteSettings,
 } from "@/sanity/lib/queries";
@@ -35,11 +36,12 @@ function formatDate(dateString: string) {
 }
 
 export default async function BeritaPage() {
-  const [schoolProfile, footerSettings, articles, concentrations] = await Promise.all([
+  const [schoolProfile, footerSettings, articles, concentrations, navbarSettings] = await Promise.all([
     getSiteSettings(),
     getFooterSettings(),
     getArticles(),
     getNavConcentrations(),
+    getNavbarSettings(),
   ]);
 
   return (
@@ -48,6 +50,7 @@ export default async function BeritaPage() {
         siteName={schoolProfile.siteName}
         logoUrl={schoolProfile.logoUrl}
         concentrations={concentrations}
+        navbarSettings={navbarSettings}
       />
 
       <main className="mx-auto w-full max-w-6xl px-4 pb-24 pt-10 sm:px-6">

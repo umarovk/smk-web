@@ -5,6 +5,7 @@ import Footbar from "@/components/footbar";
 import Navbar from "@/components/navbar";
 import {
   getFooterSettings,
+  getNavbarSettings,
   getNavConcentrations,
   getSiteSettings,
   getTahfidzSettings,
@@ -13,11 +14,12 @@ import {
 export const revalidate = 60;
 
 export default async function TahfidzPage() {
-  const [schoolProfile, footerSettings, concentrations, tahfidz] = await Promise.all([
+  const [schoolProfile, footerSettings, concentrations, tahfidz, navbarSettings] = await Promise.all([
     getSiteSettings(),
     getFooterSettings(),
     getNavConcentrations(),
     getTahfidzSettings(),
+    getNavbarSettings(),
   ]);
 
   return (
@@ -26,6 +28,7 @@ export default async function TahfidzPage() {
         siteName={schoolProfile.siteName}
         logoUrl={schoolProfile.logoUrl}
         concentrations={concentrations}
+        navbarSettings={navbarSettings}
       />
 
       <main className="mx-auto w-full max-w-6xl px-4 pb-24 pt-10 sm:px-6">

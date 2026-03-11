@@ -6,6 +6,7 @@ import Navbar from "@/components/navbar";
 import {
   getFooterSettings,
   getHomepageSettings,
+  getNavbarSettings,
   getNavConcentrations,
   getPartnerSettings,
   getSiteSettings,
@@ -14,12 +15,13 @@ import {
 export const revalidate = 60;
 
 export default async function Home() {
-  const [schoolProfile, footerSettings, homepageSettings, partnerSettings, concentrations] = await Promise.all([
+  const [schoolProfile, footerSettings, homepageSettings, partnerSettings, concentrations, navbarSettings] = await Promise.all([
     getSiteSettings(),
     getFooterSettings(),
     getHomepageSettings(),
     getPartnerSettings(),
     getNavConcentrations(),
+    getNavbarSettings(),
   ]);
 
   return (
@@ -28,6 +30,7 @@ export default async function Home() {
         siteName={schoolProfile.siteName}
         logoUrl={schoolProfile.logoUrl}
         concentrations={concentrations}
+        navbarSettings={navbarSettings}
       />
 
       <main className="mx-auto w-full max-w-6xl px-4 pb-24 pt-10 sm:px-6">

@@ -9,6 +9,7 @@ import {
   getArticleBySlug,
   getArticles,
   getFooterSettings,
+  getNavbarSettings,
   getNavConcentrations,
   getSiteSettings,
 } from "@/sanity/lib/queries";
@@ -106,12 +107,13 @@ const portableTextComponents = {
 export default async function BeritaDetailPage({ params }: PageProps) {
   const { slug } = await params;
 
-  const [schoolProfile, footerSettings, article, allArticles, concentrations] = await Promise.all([
+  const [schoolProfile, footerSettings, article, allArticles, concentrations, navbarSettings] = await Promise.all([
     getSiteSettings(),
     getFooterSettings(),
     getArticleBySlug(slug),
     getArticles(),
     getNavConcentrations(),
+    getNavbarSettings(),
   ]);
 
   if (!article) notFound();
@@ -124,6 +126,7 @@ export default async function BeritaDetailPage({ params }: PageProps) {
         siteName={schoolProfile.siteName}
         logoUrl={schoolProfile.logoUrl}
         concentrations={concentrations}
+        navbarSettings={navbarSettings}
       />
 
       <main className="mx-auto w-full max-w-6xl px-4 pb-24 pt-10 sm:px-6">

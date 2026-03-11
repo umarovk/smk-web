@@ -13,6 +13,19 @@ export type FooterLink = {
   href: string;
 };
 
+export type NavbarLink = {
+  label: string;
+  href: string;
+};
+
+export type NavbarSettings = {
+  mainLinks: NavbarLink[];
+  jurusanLabel: string;
+  secondaryLinks: NavbarLink[];
+  ctaLabel: string;
+  ctaHref: string;
+};
+
 export type FooterSettings = {
   description: string;
   address: string;
@@ -169,6 +182,22 @@ const footerSettingsQuery = groq`
   }
 `;
 
+const navbarSettingsQuery = groq`
+  *[_type == "navbarSettings"] | order(_updatedAt desc)[0]{
+    mainLinks[]{
+      label,
+      href
+    },
+    jurusanLabel,
+    secondaryLinks[]{
+      label,
+      href
+    },
+    ctaLabel,
+    ctaHref
+  }
+`;
+
 const homepageSettingsQuery = groq`
   *[_type == "homepageSettings"] | order(_updatedAt desc)[0]{
     heroBadge,
@@ -286,6 +315,21 @@ const fallbackFooterSettings: FooterSettings = {
     { label: "Profil Sekolah", href: "/profil" },
     { label: "Informasi PPDB", href: "#ppdb" },
   ],
+};
+
+const fallbackNavbarSettings: NavbarSettings = {
+  mainLinks: [
+    { label: "Beranda", href: "/" },
+    { label: "Profil", href: "/profil" },
+    { label: "Program Tahfidz", href: "/tahfidz" },
+  ],
+  jurusanLabel: "Jurusan",
+  secondaryLinks: [
+    { label: "Berita", href: "/berita" },
+    { label: "Kontak", href: "/kontak" },
+  ],
+  ctaLabel: "SPMB",
+  ctaHref: "/spmb",
 };
 
 const fallbackHomepageSettings: HomepageSettings = {
@@ -502,6 +546,34 @@ export const getFooterSettings = cache(async function getFooterSettings(): Promi
     };
   } catch {
     return fallbackFooterSettings;
+  }
+});
+
+export const getNavbarSettings = cache(async function getNavbarSettings(): Promise<NavbarSettings> {
+  if (!sanityClient) {
+    return fallbackNavbarSettings;
+  }
+
+  try {
+    const data = await sanityClient.fetch<Partial<NavbarSettings> | null>(
+      navbarSettingsQuery,
+      {},
+      { next: { revalidate: 60 } },
+    );
+
+    return {
+      mainLinks:
+        data?.mainLinks?.filter((item) => item?.label && item?.href) ||
+        fallbackNavbarSettings.mainLinks,
+      jurusanLabel: data?.jurusanLabel || fallbackNavbarSettings.jurusanLabel,
+      secondaryLinks:
+        data?.secondaryLinks?.filter((item) => item?.label && item?.href) ||
+        fallbackNavbarSettings.secondaryLinks,
+      ctaLabel: data?.ctaLabel || fallbackNavbarSettings.ctaLabel,
+      ctaHref: data?.ctaHref || fallbackNavbarSettings.ctaHref,
+    };
+  } catch {
+    return fallbackNavbarSettings;
   }
 });
 

@@ -4,6 +4,7 @@ import Footbar from "@/components/footbar";
 import Navbar from "@/components/navbar";
 import {
   getFooterSettings,
+  getNavbarSettings,
   getNavConcentrations,
   getSiteSettings,
 } from "@/sanity/lib/queries";
@@ -17,10 +18,11 @@ function normalizePhone(phone: string) {
 }
 
 export default async function KontakPage() {
-  const [schoolProfile, footerSettings, concentrations] = await Promise.all([
+  const [schoolProfile, footerSettings, concentrations, navbarSettings] = await Promise.all([
     getSiteSettings(),
     getFooterSettings(),
     getNavConcentrations(),
+    getNavbarSettings(),
   ]);
 
   const waPhone = normalizePhone(footerSettings.phone);
@@ -33,6 +35,7 @@ export default async function KontakPage() {
         siteName={schoolProfile.siteName}
         logoUrl={schoolProfile.logoUrl}
         concentrations={concentrations}
+        navbarSettings={navbarSettings}
       />
 
       <main className="mx-auto w-full max-w-6xl px-4 pb-24 pt-10 sm:px-6">

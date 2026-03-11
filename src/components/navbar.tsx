@@ -4,6 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRef, useState, useEffect } from "react";
 
+import type { NavbarSettings } from "@/sanity/lib/queries";
+
 type Concentration = {
   name: string;
   slug: string;
@@ -13,12 +15,14 @@ type NavbarProps = {
   siteName?: string;
   logoUrl?: string | null;
   concentrations?: Concentration[];
+  navbarSettings?: NavbarSettings;
 };
 
 export default function Navbar({
   siteName = "SMK Web",
   logoUrl = "/logo-smk.svg",
   concentrations = [],
+  navbarSettings,
 }: NavbarProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [jurusanOpen, setJurusanOpen] = useState(false);
@@ -36,16 +40,18 @@ export default function Navbar({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const staticItems = [
+  const staticItems = navbarSettings?.mainLinks || [
     { href: "/", label: "Beranda" },
     { href: "/profil", label: "Profil" },
     { href: "/tahfidz", label: "Program Tahfidz" },
   ];
-
-  const trailingItems = [
+  const trailingItems = navbarSettings?.secondaryLinks || [
     { href: "/berita", label: "Berita" },
     { href: "/kontak", label: "Kontak" },
   ];
+  const jurusanLabel = navbarSettings?.jurusanLabel || "Jurusan";
+  const ctaLabel = navbarSettings?.ctaLabel || "SPMB";
+  const ctaHref = navbarSettings?.ctaHref || "/spmb";
 
   return (
     <header className="sticky top-0 z-50 border-b border-slate-200/60 bg-white/80 backdrop-blur-xl backdrop-saturate-150">
@@ -105,7 +111,7 @@ export default function Navbar({
                 onClick={() => setJurusanOpen((prev) => !prev)}
                 aria-expanded={jurusanOpen}
               >
-                Jurusan
+                {jurusanLabel}
                 <svg
                   width="12"
                   height="12"
@@ -164,10 +170,10 @@ export default function Navbar({
 
           <li className="ml-2">
             <Link
-              href="/spmb"
+              href={ctaHref}
               className="hover-shine inline-flex items-center rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm shadow-emerald-600/15 transition-all hover:bg-emerald-700"
             >
-              SPMB
+              {ctaLabel}
             </Link>
           </li>
         </ul>
@@ -200,7 +206,7 @@ export default function Navbar({
                 className="flex w-full items-center justify-between rounded-lg px-3 py-2.5 transition-colors hover:bg-emerald-50 hover:text-emerald-700"
                 onClick={() => setMobileJurusanOpen((prev) => !prev)}
               >
-                Jurusan
+                {jurusanLabel}
                 <svg
                   width="12"
                   height="12"
@@ -257,11 +263,11 @@ export default function Navbar({
 
           <li className="mt-1">
             <Link
-              href="/spmb"
+              href={ctaHref}
               className="block rounded-lg bg-emerald-600 px-4 py-2.5 text-center font-semibold text-white transition-colors hover:bg-emerald-700"
               onClick={() => setIsOpen(false)}
             >
-              SPMB
+              {ctaLabel}
             </Link>
           </li>
         </ul>

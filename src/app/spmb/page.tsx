@@ -6,6 +6,7 @@ import Navbar from "@/components/navbar";
 import {
   getConcentrations,
   getFooterSettings,
+  getNavbarSettings,
   getNavConcentrations,
   getSiteSettings,
   getSpmbSettings,
@@ -21,7 +22,7 @@ function normalizePhone(phone: string) {
 }
 
 export default async function SpmbPage() {
-  const [schoolProfile, footerSettings, navConcentrations, concentrations, tahfidz, spmb] =
+  const [schoolProfile, footerSettings, navConcentrations, concentrations, tahfidz, spmb, navbarSettings] =
     await Promise.all([
       getSiteSettings(),
       getFooterSettings(),
@@ -29,6 +30,7 @@ export default async function SpmbPage() {
       getConcentrations(),
       getTahfidzSettings(),
       getSpmbSettings(),
+      getNavbarSettings(),
     ]);
 
   const waHref = `https://wa.me/${normalizePhone(footerSettings.phone)}`;
@@ -39,6 +41,7 @@ export default async function SpmbPage() {
         siteName={schoolProfile.siteName}
         logoUrl={schoolProfile.logoUrl}
         concentrations={navConcentrations}
+        navbarSettings={navbarSettings}
       />
 
       <main className="mx-auto w-full max-w-6xl px-4 pb-24 pt-10 sm:px-6">
