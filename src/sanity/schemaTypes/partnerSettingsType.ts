@@ -10,7 +10,7 @@ export const partnerSettingsType = defineType({
       title: "Judul Section",
       type: "string",
       initialValue: "Media Partner & Industri MoU",
-      validation: (rule) => rule.required().min(5),
+      validation: (rule) => rule.min(5),
     }),
     defineField({
       name: "description",
@@ -19,7 +19,7 @@ export const partnerSettingsType = defineType({
       rows: 3,
       initialValue:
         "Sekolah kami berkolaborasi dengan media partner dan perusahaan industri untuk memperkuat pembelajaran berbasis dunia kerja.",
-      validation: (rule) => rule.required().min(20),
+      validation: (rule) => rule.min(20),
     }),
     defineField({
       name: "partners",
@@ -36,7 +36,7 @@ export const partnerSettingsType = defineType({
               name: "name",
               title: "Nama Partner",
               type: "string",
-              validation: (rule) => rule.required().min(2),
+              validation: (rule) => rule.min(2),
             }),
             defineField({
               name: "category",
@@ -50,14 +50,14 @@ export const partnerSettingsType = defineType({
                 layout: "radio",
               },
               initialValue: "company",
-              validation: (rule) => rule.required(),
+              validation: (rule) => rule,
             }),
             defineField({
               name: "logo",
               title: "Logo",
               type: "image",
               options: { hotspot: true },
-              validation: (rule) => rule.required(),
+              validation: (rule) => rule,
             }),
             defineField({
               name: "website",

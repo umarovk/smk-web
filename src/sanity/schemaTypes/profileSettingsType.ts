@@ -11,21 +11,21 @@ export const profileSettingsType = defineType({
       type: "image",
       options: { hotspot: true },
       description: "Foto utama banner halaman profil (landscape).",
-      validation: (rule) => rule.required(),
+      validation: (rule) => rule,
     }),
     defineField({
       name: "heroAlt",
       title: "Hero Alt Text",
       type: "string",
       initialValue: "Gedung sekolah tampak depan",
-      validation: (rule) => rule.required().min(5),
+      validation: (rule) => rule.min(5),
     }),
     defineField({
       name: "profileDescription",
       title: "Deskripsi Profil Sekolah",
       type: "text",
       rows: 5,
-      validation: (rule) => rule.required().min(50),
+      validation: (rule) => rule.min(50),
     }),
     defineField({
       name: "profileImage",
@@ -45,7 +45,7 @@ export const profileSettingsType = defineType({
       title: "Sejarah Sekolah",
       type: "text",
       rows: 6,
-      validation: (rule) => rule.required().min(50),
+      validation: (rule) => rule.min(50),
     }),
     defineField({
       name: "historyImage",
@@ -64,7 +64,7 @@ export const profileSettingsType = defineType({
       title: "Visi",
       type: "text",
       rows: 3,
-      validation: (rule) => rule.required().min(20),
+      validation: (rule) => rule.min(20),
     }),
     defineField({
       name: "missions",
@@ -81,7 +81,7 @@ export const profileSettingsType = defineType({
               title: "Isi Misi",
               type: "text",
               rows: 2,
-              validation: (rule) => rule.required().min(10),
+              validation: (rule) => rule.min(10),
             }),
           ],
           preview: {
@@ -106,7 +106,7 @@ export const profileSettingsType = defineType({
               title: "Isi Tujuan",
               type: "text",
               rows: 2,
-              validation: (rule) => rule.required().min(10),
+              validation: (rule) => rule.min(10),
             }),
           ],
           preview: {
@@ -122,7 +122,7 @@ export const profileSettingsType = defineType({
       type: "string",
       description: "Teks kecil di atas judul CTA (misal: 'Tertarik Bergabung?').",
       initialValue: "Tertarik Bergabung?",
-      validation: (rule) => rule.required().min(3),
+      validation: (rule) => rule.min(3),
     }),
     defineField({
       name: "ctaTitle",
@@ -130,7 +130,7 @@ export const profileSettingsType = defineType({
       type: "string",
       description: "Judul utama section CTA.",
       initialValue: "Daftarkan Diri Anda Sekarang",
-      validation: (rule) => rule.required().min(5),
+      validation: (rule) => rule.min(5),
     }),
     defineField({
       name: "ctaDescription",
@@ -140,7 +140,7 @@ export const profileSettingsType = defineType({
       description: "Deskripsi pendek di bawah judul CTA. Gunakan {siteName} untuk nama sekolah.",
       initialValue:
         "Bergabunglah bersama kami dan raih masa depan terbaik melalui pendidikan vokasi berkualitas.",
-      validation: (rule) => rule.required().min(20),
+      validation: (rule) => rule.min(20),
     }),
     defineField({
       name: "seoTitle",
@@ -171,13 +171,13 @@ export const profileSettingsType = defineType({
               title: "Gambar",
               type: "image",
               options: { hotspot: true },
-              validation: (rule) => rule.required(),
+              validation: (rule) => rule,
             }),
             defineField({
               name: "alt",
               title: "Alt Text",
               type: "string",
-              validation: (rule) => rule.required().min(5),
+              validation: (rule) => rule.min(5),
             }),
           ],
           preview: {

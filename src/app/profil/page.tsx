@@ -9,6 +9,7 @@ import {
   getConcentrations,
   getFooterSettings,
   getNavbarSettings,
+  getNavConcentrations,
   getProfileSettings,
   getSeoSettings,
   getSiteSettings,
@@ -33,20 +34,22 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function ProfilPage() {
-  const [schoolProfile, footerSettings, profile, concentrations, navbarSettings] = await Promise.all([
-    getSiteSettings(),
-    getFooterSettings(),
-    getProfileSettings(),
-    getConcentrations(),
-    getNavbarSettings(),
-  ]);
+  const [schoolProfile, footerSettings, profile, concentrationCards, navConcentrations, navbarSettings] =
+    await Promise.all([
+      getSiteSettings(),
+      getFooterSettings(),
+      getProfileSettings(),
+      getConcentrations(),
+      getNavConcentrations(),
+      getNavbarSettings(),
+    ]);
 
   return (
     <div className="min-h-screen font-[family-name:var(--font-body)] text-[var(--foreground)]">
       <Navbar
         siteName={schoolProfile.siteName}
         logoUrl={schoolProfile.logoUrl}
-        concentrations={concentrations}
+        concentrations={navConcentrations}
         navbarSettings={navbarSettings}
       />
 
@@ -218,7 +221,7 @@ export default async function ProfilPage() {
           </div>
 
           <div className="grid gap-6 md:grid-cols-2">
-            {concentrations.map((item) => (
+            {concentrationCards.map((item) => (
               <Link
                 key={item.slug}
                 href={`/jurusan/${item.slug}`}

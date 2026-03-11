@@ -10,14 +10,14 @@ export const seoSettingsType = defineType({
       title: "Site Title",
       type: "string",
       initialValue: "SMK Web",
-      validation: (rule) => rule.required(),
+      validation: (rule) => rule,
     }),
     defineField({
       name: "defaultDescription",
       title: "Default Description",
       type: "text",
       rows: 3,
-      validation: (rule) => rule.required().min(20),
+      validation: (rule) => rule.min(20),
     }),
     defineField({
       name: "defaultOgImage",

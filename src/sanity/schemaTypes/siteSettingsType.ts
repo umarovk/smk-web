@@ -9,7 +9,7 @@ export const siteSettingsType = defineType({
       name: "siteName",
       title: "Nama Sekolah",
       type: "string",
-      validation: (rule) => rule.required().min(3),
+      validation: (rule) => rule.min(3),
     }),
     defineField({
       name: "logo",

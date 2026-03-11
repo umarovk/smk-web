@@ -9,7 +9,7 @@ export const concentrationType = defineType({
       name: "name",
       title: "Nama Konsentrasi",
       type: "string",
-      validation: (rule) => rule.required().min(3),
+      validation: (rule) => rule.min(3),
     }),
     defineField({
       name: "slug",
@@ -17,14 +17,14 @@ export const concentrationType = defineType({
       type: "slug",
       description: "Digunakan sebagai URL halaman jurusan. Klik Generate dari nama.",
       options: { source: "name", maxLength: 96 },
-      validation: (rule) => rule.required(),
+      validation: (rule) => rule,
     }),
     defineField({
       name: "description",
       title: "Deskripsi",
       type: "text",
       rows: 3,
-      validation: (rule) => rule.required().min(20),
+      validation: (rule) => rule.min(20),
     }),
     defineField({
       name: "duration",
