@@ -51,6 +51,11 @@ export type HomepageGalleryFrame = {
   alt: string;
 };
 
+export type FeeItem = {
+  label: string;
+  amount: number;
+};
+
 export type PartnerItem = {
   name: string;
   category: "media" | "company";
@@ -181,6 +186,18 @@ export type SpmbSettings = {
   registrationFlow: string[];
   scheduleItems: string[];
   scheduleSecondaryItems: string[];
+  showReRegistrationSection: boolean;
+  reRegistrationHeading: string;
+  femaleFeeTitle: string;
+  femaleFeeItems: FeeItem[];
+  femaleTotalLabel: string;
+  femaleTotalAmount: number;
+  femaleAchievementNote: string;
+  maleFeeTitle: string;
+  maleFeeItems: FeeItem[];
+  maleTotalLabel: string;
+  maleTotalAmount: number;
+  maleAchievementNote: string;
   ctaTitle: string;
   ctaDescription: string;
   seoTitle?: string;
@@ -351,6 +368,24 @@ const spmbSettingsQuery = groq`
     registrationFlow,
     scheduleItems,
     scheduleSecondaryItems,
+    showReRegistrationSection,
+    reRegistrationHeading,
+    femaleFeeTitle,
+    femaleFeeItems[]{
+      label,
+      amount
+    },
+    femaleTotalLabel,
+    femaleTotalAmount,
+    femaleAchievementNote,
+    maleFeeTitle,
+    maleFeeItems[]{
+      label,
+      amount
+    },
+    maleTotalLabel,
+    maleTotalAmount,
+    maleAchievementNote,
     ctaTitle,
     ctaDescription,
     seoTitle,
@@ -587,6 +622,53 @@ const fallbackSpmbSettings: SpmbSettings = {
     "Pembagian kelas: setelah registrasi ulang",
     "Tes pemetaan awal: pekan pertama tahun ajaran",
   ],
+  showReRegistrationSection: true,
+  reRegistrationHeading: "Biaya Daftar Ulang",
+  femaleFeeTitle: "Untuk Siswa Putri",
+  femaleFeeItems: [
+    { label: "1 Stel Bahan Osis", amount: 143000 },
+    { label: "1 Stel Bahan Pramuka", amount: 143000 },
+    { label: "Atribut Osis dan Pramuka", amount: 80000 },
+    { label: "Pakaian Olah Raga", amount: 149000 },
+    { label: "Simpanan Wajib Koperasi", amount: 25000 },
+    { label: "Iuran Perlombaan Olah Raga", amount: 145000 },
+    { label: "Kegiatan Pramuka", amount: 75000 },
+    { label: "MPLS & PTA", amount: 165000 },
+    { label: "Iuran Agustusan", amount: 70000 },
+    { label: "Iuran Hardiknas", amount: 75000 },
+    { label: "Bulan Dana PMI", amount: 5000 },
+    { label: "Kerudung Siswi", amount: 70000 },
+    { label: "Lomba Kompetensi Siswa", amount: 230000 },
+    { label: "MKKS SMK", amount: 85000 },
+    { label: "Kartu Pelajar dan KTA Pramuka", amount: 50000 },
+    { label: "Rangkaian Milad SMK", amount: 80000 },
+    { label: "Pengembangan Kegiatan Jurusan", amount: 100000 },
+  ],
+  femaleTotalLabel: "Total Biaya Daftar Ulang",
+  femaleTotalAmount: 1690000,
+  femaleAchievementNote: "Jalur Prestasi Daftar Ulang Sebesar : Rp. 1.175.000",
+  maleFeeTitle: "Untuk Siswa Putra",
+  maleFeeItems: [
+    { label: "1 Stel Bahan Osis", amount: 143000 },
+    { label: "1 Stel Bahan Pramuka", amount: 143000 },
+    { label: "Atribut Osis dan Pramuka", amount: 80000 },
+    { label: "Pakaian Olah Raga", amount: 144000 },
+    { label: "Simpanan Wajib Koperasi", amount: 25000 },
+    { label: "Iuran Perlombaan Olah Raga", amount: 145000 },
+    { label: "Kegiatan Pramuka", amount: 75000 },
+    { label: "MPLS & PTA", amount: 165000 },
+    { label: "Iuran Agustusan", amount: 70000 },
+    { label: "Iuran Hardiknas", amount: 75000 },
+    { label: "Bulan Dana PMI", amount: 5000 },
+    { label: "Lomba Kompetensi Siswa", amount: 230000 },
+    { label: "MKKS SMK", amount: 85000 },
+    { label: "Kartu Pelajar dan KTA Pramuka", amount: 50000 },
+    { label: "Milad SMK", amount: 80000 },
+    { label: "Pengembangan Kegiatan Jurusan", amount: 100000 },
+  ],
+  maleTotalLabel: "Total Biaya Daftar Ulang",
+  maleTotalAmount: 1615000,
+  maleAchievementNote: "Jalur Prestasi Daftar Ulang Sebesar : Rp. 1.175.000",
   ctaTitle: "Butuh Bantuan Pendaftaran?",
   ctaDescription:
     "Tim panitia SPMB siap membantu Anda terkait alur pendaftaran, berkas, dan jadwal seleksi.",
@@ -950,6 +1032,43 @@ export const getSpmbSettings = cache(
           data?.scheduleSecondaryItems?.filter(
             (item) => typeof item === "string" && item.length > 0,
           ) || fallbackSpmbSettings.scheduleSecondaryItems,
+        showReRegistrationSection:
+          typeof data?.showReRegistrationSection === "boolean"
+            ? data.showReRegistrationSection
+            : fallbackSpmbSettings.showReRegistrationSection,
+        reRegistrationHeading:
+          data?.reRegistrationHeading || fallbackSpmbSettings.reRegistrationHeading,
+        femaleFeeTitle: data?.femaleFeeTitle || fallbackSpmbSettings.femaleFeeTitle,
+        femaleFeeItems:
+          data?.femaleFeeItems?.filter(
+            (item) =>
+              item &&
+              typeof item.label === "string" &&
+              item.label.length > 0 &&
+              typeof item.amount === "number",
+          ) || fallbackSpmbSettings.femaleFeeItems,
+        femaleTotalLabel: data?.femaleTotalLabel || fallbackSpmbSettings.femaleTotalLabel,
+        femaleTotalAmount:
+          typeof data?.femaleTotalAmount === "number"
+            ? data.femaleTotalAmount
+            : fallbackSpmbSettings.femaleTotalAmount,
+        femaleAchievementNote:
+          data?.femaleAchievementNote || fallbackSpmbSettings.femaleAchievementNote,
+        maleFeeTitle: data?.maleFeeTitle || fallbackSpmbSettings.maleFeeTitle,
+        maleFeeItems:
+          data?.maleFeeItems?.filter(
+            (item) =>
+              item &&
+              typeof item.label === "string" &&
+              item.label.length > 0 &&
+              typeof item.amount === "number",
+          ) || fallbackSpmbSettings.maleFeeItems,
+        maleTotalLabel: data?.maleTotalLabel || fallbackSpmbSettings.maleTotalLabel,
+        maleTotalAmount:
+          typeof data?.maleTotalAmount === "number"
+            ? data.maleTotalAmount
+            : fallbackSpmbSettings.maleTotalAmount,
+        maleAchievementNote: data?.maleAchievementNote || fallbackSpmbSettings.maleAchievementNote,
         ctaTitle: data?.ctaTitle || fallbackSpmbSettings.ctaTitle,
         ctaDescription: data?.ctaDescription || fallbackSpmbSettings.ctaDescription,
         seoTitle: data?.seoTitle || fallbackSpmbSettings.seoTitle,

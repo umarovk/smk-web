@@ -33,6 +33,10 @@ function normalizePhone(phone: string) {
   return digits;
 }
 
+function formatRupiah(amount: number) {
+  return new Intl.NumberFormat("id-ID").format(amount);
+}
+
 export default async function SpmbPage() {
   const [schoolProfile, footerSettings, navConcentrations, concentrations, tahfidz, spmb, navbarSettings] =
     await Promise.all([
@@ -251,6 +255,82 @@ export default async function SpmbPage() {
             </ul>
           </article>
         </section>
+
+        {spmb.showReRegistrationSection && (
+          <section className="mt-8">
+            <div className="mb-5 max-w-xl">
+              <p className="text-[0.65rem] font-bold uppercase tracking-[0.18em] text-emerald-600">
+                {spmb.reRegistrationHeading}
+              </p>
+            </div>
+
+            <div className="grid gap-6 lg:grid-cols-2">
+              <article className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                <div className="border-b border-slate-200 bg-slate-50 px-4 py-3">
+                  <h3 className="font-display text-sm font-bold text-slate-900">{spmb.femaleFeeTitle}</h3>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[520px] text-sm">
+                    <tbody>
+                      {spmb.femaleFeeItems.map((item, idx) => (
+                        <tr key={`${item.label}-${idx}`} className="border-b border-slate-100">
+                          <td className="w-10 px-3 py-2 text-center font-semibold text-slate-600">
+                            {idx + 1}
+                          </td>
+                          <td className="px-3 py-2 text-slate-700">{item.label}</td>
+                          <td className="w-9 px-2 py-2 text-slate-500">Rp</td>
+                          <td className="w-32 px-3 py-2 text-right font-semibold text-slate-900">
+                            {formatRupiah(item.amount)}
+                          </td>
+                        </tr>
+                      ))}
+                      <tr className="bg-slate-50 font-bold text-slate-900">
+                        <td className="px-3 py-2" colSpan={2}>
+                          {spmb.femaleTotalLabel}
+                        </td>
+                        <td className="px-2 py-2">Rp</td>
+                        <td className="px-3 py-2 text-right">{formatRupiah(spmb.femaleTotalAmount)}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <p className="px-4 py-3 text-sm text-slate-600">{spmb.femaleAchievementNote}</p>
+              </article>
+
+              <article className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                <div className="border-b border-slate-200 bg-slate-50 px-4 py-3">
+                  <h3 className="font-display text-sm font-bold text-slate-900">{spmb.maleFeeTitle}</h3>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[520px] text-sm">
+                    <tbody>
+                      {spmb.maleFeeItems.map((item, idx) => (
+                        <tr key={`${item.label}-${idx}`} className="border-b border-slate-100">
+                          <td className="w-10 px-3 py-2 text-center font-semibold text-slate-600">
+                            {idx + 1}
+                          </td>
+                          <td className="px-3 py-2 text-slate-700">{item.label}</td>
+                          <td className="w-9 px-2 py-2 text-slate-500">Rp</td>
+                          <td className="w-32 px-3 py-2 text-right font-semibold text-slate-900">
+                            {formatRupiah(item.amount)}
+                          </td>
+                        </tr>
+                      ))}
+                      <tr className="bg-slate-50 font-bold text-slate-900">
+                        <td className="px-3 py-2" colSpan={2}>
+                          {spmb.maleTotalLabel}
+                        </td>
+                        <td className="px-2 py-2">Rp</td>
+                        <td className="px-3 py-2 text-right">{formatRupiah(spmb.maleTotalAmount)}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <p className="px-4 py-3 text-sm text-slate-600">{spmb.maleAchievementNote}</p>
+              </article>
+            </div>
+          </section>
+        )}
 
         <section className="relative mt-10 overflow-hidden rounded-[1.75rem] bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-700 px-6 py-12 text-center sm:px-12">
           <div className="absolute inset-0 dot-grid opacity-[0.06]" />

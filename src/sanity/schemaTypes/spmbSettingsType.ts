@@ -145,6 +145,160 @@ export const spmbSettingsType = defineType({
       validation: (rule) => rule.min(1).max(12),
     }),
     defineField({
+      name: "showReRegistrationSection",
+      title: "Tampilkan Section Biaya Daftar Ulang",
+      type: "boolean",
+      initialValue: true,
+      description: "Aktifkan untuk menampilkan, nonaktifkan untuk menyembunyikan section ini.",
+    }),
+    defineField({
+      name: "reRegistrationHeading",
+      title: "Judul Section Biaya Daftar Ulang",
+      type: "string",
+      initialValue: "Biaya Daftar Ulang",
+      validation: (rule) => rule.required(),
+    }),
+    defineField({
+      name: "femaleFeeTitle",
+      title: "Judul Tabel Putri",
+      type: "string",
+      initialValue: "Untuk Siswa Putri",
+      validation: (rule) => rule.required(),
+    }),
+    defineField({
+      name: "femaleFeeItems",
+      title: "Item Biaya Putri",
+      type: "array",
+      of: [
+        {
+          type: "object",
+          name: "feeItem",
+          title: "Item Biaya",
+          fields: [
+            defineField({
+              name: "label",
+              title: "Nama Item",
+              type: "string",
+              validation: (rule) => rule.required(),
+            }),
+            defineField({
+              name: "amount",
+              title: "Nominal (angka saja)",
+              type: "number",
+              validation: (rule) => rule.required().min(0),
+            }),
+          ],
+          preview: {
+            select: {
+              title: "label",
+              amount: "amount",
+            },
+            prepare(selection) {
+              return {
+                title: selection.title,
+                subtitle:
+                  typeof selection.amount === "number"
+                    ? `Rp ${new Intl.NumberFormat("id-ID").format(selection.amount)}`
+                    : "Rp 0",
+              };
+            },
+          },
+        },
+      ],
+      validation: (rule) => rule.min(1).max(30),
+    }),
+    defineField({
+      name: "femaleTotalLabel",
+      title: "Label Total Putri",
+      type: "string",
+      initialValue: "Total Biaya Daftar Ulang",
+      validation: (rule) => rule.required(),
+    }),
+    defineField({
+      name: "femaleTotalAmount",
+      title: "Total Putri (angka saja)",
+      type: "number",
+      initialValue: 1690000,
+      validation: (rule) => rule.required().min(0),
+    }),
+    defineField({
+      name: "femaleAchievementNote",
+      title: "Catatan Jalur Prestasi Putri",
+      type: "string",
+      initialValue: "Jalur Prestasi Daftar Ulang Sebesar : Rp. 1.175.000",
+      validation: (rule) => rule.required(),
+    }),
+    defineField({
+      name: "maleFeeTitle",
+      title: "Judul Tabel Putra",
+      type: "string",
+      initialValue: "Untuk Siswa Putra",
+      validation: (rule) => rule.required(),
+    }),
+    defineField({
+      name: "maleFeeItems",
+      title: "Item Biaya Putra",
+      type: "array",
+      of: [
+        {
+          type: "object",
+          name: "feeItemMale",
+          title: "Item Biaya",
+          fields: [
+            defineField({
+              name: "label",
+              title: "Nama Item",
+              type: "string",
+              validation: (rule) => rule.required(),
+            }),
+            defineField({
+              name: "amount",
+              title: "Nominal (angka saja)",
+              type: "number",
+              validation: (rule) => rule.required().min(0),
+            }),
+          ],
+          preview: {
+            select: {
+              title: "label",
+              amount: "amount",
+            },
+            prepare(selection) {
+              return {
+                title: selection.title,
+                subtitle:
+                  typeof selection.amount === "number"
+                    ? `Rp ${new Intl.NumberFormat("id-ID").format(selection.amount)}`
+                    : "Rp 0",
+              };
+            },
+          },
+        },
+      ],
+      validation: (rule) => rule.min(1).max(30),
+    }),
+    defineField({
+      name: "maleTotalLabel",
+      title: "Label Total Putra",
+      type: "string",
+      initialValue: "Total Biaya Daftar Ulang",
+      validation: (rule) => rule.required(),
+    }),
+    defineField({
+      name: "maleTotalAmount",
+      title: "Total Putra (angka saja)",
+      type: "number",
+      initialValue: 1615000,
+      validation: (rule) => rule.required().min(0),
+    }),
+    defineField({
+      name: "maleAchievementNote",
+      title: "Catatan Jalur Prestasi Putra",
+      type: "string",
+      initialValue: "Jalur Prestasi Daftar Ulang Sebesar : Rp. 1.175.000",
+      validation: (rule) => rule.required(),
+    }),
+    defineField({
       name: "ctaTitle",
       title: "CTA Title",
       type: "string",
