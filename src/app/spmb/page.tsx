@@ -84,21 +84,17 @@ export default async function SpmbPage() {
         <section className="mt-8">
           <div className="mb-4 max-w-xl">
             <p className="text-[0.65rem] font-bold uppercase tracking-[0.18em] text-emerald-600">
-              Suasana SPMB
+              {spmb.galleryHeading}
             </p>
           </div>
           <div className="grid gap-3 sm:grid-cols-3">
-            {[
-              { src: "/foto-sekolah-1.svg", alt: "Layanan informasi pendaftaran" },
-              { src: "/foto-sekolah-2.svg", alt: "Sosialisasi program keahlian" },
-              { src: "/hero-sekolah.svg", alt: "Kunjungan calon murid ke sekolah" },
-            ].map((photo) => (
+            {spmb.galleryPhotos.map((photo) => (
               <div
                 key={photo.alt}
                 className="group relative h-28 overflow-hidden rounded-xl border border-slate-100 bg-slate-50 sm:h-32"
               >
                 <Image
-                  src={photo.src}
+                  src={photo.imageUrl}
                   alt={photo.alt}
                   fill
                   sizes="(max-width: 640px) 100vw, 33vw"
@@ -115,7 +111,7 @@ export default async function SpmbPage() {
 
         <section className="mt-10 rounded-2xl border border-slate-100 bg-[var(--surface)] p-6 sm:p-8">
           <p className="text-[0.65rem] font-bold uppercase tracking-[0.18em] text-emerald-600">
-            Informasi Pendaftaran
+            {spmb.registrationInfoHeading}
           </p>
           <ul className="mt-4 space-y-3">
             {spmb.registrationInfo.map((item) => (
@@ -130,7 +126,7 @@ export default async function SpmbPage() {
         <section className="mt-8">
           <div className="mb-5 max-w-xl">
             <p className="text-[0.65rem] font-bold uppercase tracking-[0.18em] text-emerald-600">
-              Program Keahlian Tersedia
+              {spmb.concentrationsHeading}
             </p>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
@@ -138,40 +134,66 @@ export default async function SpmbPage() {
               <Link
                 key={item.slug}
                 href={`/jurusan/${item.slug}`}
-                className="card-lift rounded-2xl border border-slate-100 bg-[var(--surface)] p-5"
+                className="card-lift overflow-hidden rounded-2xl border border-slate-100 bg-[var(--surface)]"
               >
-                <h3 className="font-display text-base font-bold text-slate-900">{item.name}</h3>
-                <p className="mt-2 text-sm leading-6 text-slate-500">{item.description}</p>
+                <div className="relative h-40 w-full">
+                  <Image
+                    src={item.imageUrl || "/hero-sekolah.svg"}
+                    alt={item.imageAlt || item.name}
+                    fill
+                    sizes="(max-width: 640px) 100vw, 50vw"
+                    className="object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent" />
+                </div>
+                <div className="p-5">
+                  <h3 className="font-display text-base font-bold text-slate-900">{item.name}</h3>
+                  <p className="mt-2 text-sm leading-6 text-slate-500">{item.description}</p>
+                </div>
               </Link>
             ))}
           </div>
         </section>
 
         <section className="mt-8 rounded-2xl border border-slate-100 bg-[var(--surface)] p-6 sm:p-8">
-          <p className="text-[0.65rem] font-bold uppercase tracking-[0.18em] text-emerald-600">
-            Program Tahfidzul Qur&apos;an
-          </p>
-          <h2 className="font-display mt-2 text-2xl font-extrabold tracking-tight text-slate-900">
-            {tahfidz.heroTitle}
-          </h2>
-          <p className="mt-3 text-sm leading-7 text-slate-600">{tahfidz.heroDescription}</p>
-          <p className="mt-4 inline-flex rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
-            Target: {tahfidz.targetHafalan}
-          </p>
-          <div className="mt-5">
-            <Link
-              href="/tahfidz"
-              className="inline-flex items-center rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition-all hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700"
-            >
-              Lihat Detail Program Tahfidz
-            </Link>
+          <div className="grid gap-6 md:grid-cols-2 md:items-center">
+            <div>
+              <p className="text-[0.65rem] font-bold uppercase tracking-[0.18em] text-emerald-600">
+                Program Tahfidzul Qur&apos;an
+              </p>
+              <h2 className="font-display mt-2 text-2xl font-extrabold tracking-tight text-slate-900">
+                {tahfidz.heroTitle}
+              </h2>
+              <p className="mt-3 text-sm leading-7 text-slate-600">{tahfidz.heroDescription}</p>
+              <p className="mt-4 inline-flex rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
+                Target: {tahfidz.targetHafalan}
+              </p>
+              <div className="mt-5">
+                <Link
+                  href="/tahfidz"
+                  className="inline-flex items-center rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition-all hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700"
+                >
+                  Lihat Detail Program Tahfidz
+                </Link>
+              </div>
+            </div>
+
+            <div className="relative h-56 overflow-hidden rounded-2xl border border-slate-100 sm:h-64">
+              <Image
+                src={tahfidz.heroImageUrl || "/hero-sekolah.svg"}
+                alt={tahfidz.heroImageAlt || "Program Tahfidz"}
+                fill
+                sizes="(max-width: 768px) 100vw, 50vw"
+                className="object-cover"
+              />
+            </div>
           </div>
         </section>
 
         <section className="mt-8 grid gap-6 md:grid-cols-2">
           <article className="rounded-2xl border border-slate-100 bg-[var(--surface)] p-6">
             <p className="text-[0.65rem] font-bold uppercase tracking-[0.18em] text-emerald-600">
-              Persyaratan
+              {spmb.requirementsHeading}
             </p>
             <ul className="mt-4 space-y-2.5">
               {spmb.requirements.map((item) => (
@@ -185,7 +207,7 @@ export default async function SpmbPage() {
 
           <article className="rounded-2xl border border-slate-100 bg-[var(--surface)] p-6">
             <p className="text-[0.65rem] font-bold uppercase tracking-[0.18em] text-emerald-600">
-              Alur Pendaftaran
+              {spmb.registrationFlowHeading}
             </p>
             <ol className="mt-4 space-y-2.5">
               {spmb.registrationFlow.map((item, idx) => (
@@ -200,18 +222,34 @@ export default async function SpmbPage() {
           </article>
         </section>
 
-        <section className="mt-8 rounded-2xl border border-slate-100 bg-[var(--surface)] p-6">
-          <p className="text-[0.65rem] font-bold uppercase tracking-[0.18em] text-emerald-600">
-            Jadwal SPMB
-          </p>
-          <ul className="mt-4 space-y-2.5">
-            {spmb.scheduleItems.map((item) => (
-              <li key={item} className="flex items-start gap-2 text-sm leading-6 text-slate-600">
-                <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-teal-500" />
-                <span>{item}</span>
-              </li>
-            ))}
-          </ul>
+        <section className="mt-8 grid gap-6 md:grid-cols-2">
+          <article className="rounded-2xl border border-slate-100 bg-[var(--surface)] p-6">
+            <p className="text-[0.65rem] font-bold uppercase tracking-[0.18em] text-emerald-600">
+              {spmb.scheduleHeading}
+            </p>
+            <ul className="mt-4 space-y-2.5">
+              {spmb.scheduleItems.map((item) => (
+                <li key={item} className="flex items-start gap-2 text-sm leading-6 text-slate-600">
+                  <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-teal-500" />
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </article>
+
+          <article className="rounded-2xl border border-slate-100 bg-[var(--surface)] p-6">
+            <p className="text-[0.65rem] font-bold uppercase tracking-[0.18em] text-emerald-600">
+              {spmb.scheduleSecondaryHeading}
+            </p>
+            <ul className="mt-4 space-y-2.5">
+              {spmb.scheduleSecondaryItems.map((item) => (
+                <li key={item} className="flex items-start gap-2 text-sm leading-6 text-slate-600">
+                  <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-teal-500" />
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </article>
         </section>
 
         <section className="relative mt-10 overflow-hidden rounded-[1.75rem] bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-700 px-6 py-12 text-center sm:px-12">

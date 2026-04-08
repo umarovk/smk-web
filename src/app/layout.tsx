@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import { absoluteUrl, getSiteUrl } from "@/lib/seo";
-import { getSeoSettings } from "@/sanity/lib/queries";
+import { getSeoSettings, getSiteSettings } from "@/sanity/lib/queries";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -22,8 +22,9 @@ const jakarta = Plus_Jakarta_Sans({
 });
 
 export async function generateMetadata(): Promise<Metadata> {
-  const seo = await getSeoSettings();
+  const [seo, site] = await Promise.all([getSeoSettings(), getSiteSettings()]);
   const ogImage = seo.defaultOgImageUrl || absoluteUrl("/hero-sekolah.svg");
+  const siteIcon = site.siteIconUrl || site.logoUrl || "/logo-smk.svg";
 
   return {
     metadataBase: new URL(getSiteUrl()),
@@ -33,6 +34,11 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     description: seo.defaultDescription,
     applicationName: seo.siteTitle,
+    icons: {
+      icon: siteIcon,
+      shortcut: siteIcon,
+      apple: siteIcon,
+    },
     alternates: {
       canonical: absoluteUrl("/"),
     },

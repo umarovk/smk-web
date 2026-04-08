@@ -7,6 +7,7 @@ import { optimizeSanityImageUrl } from "@/sanity/lib/image";
 export type SiteSettings = {
   siteName: string;
   logoUrl: string | null;
+  siteIconUrl: string | null;
 };
 
 export type FooterLink = {
@@ -167,10 +168,19 @@ export type SpmbSettings = {
   heroBadge: string;
   heroTitle: string;
   heroDescription: string;
+  galleryPhotos: HomepageGalleryFrame[];
+  galleryHeading: string;
+  registrationInfoHeading: string;
+  concentrationsHeading: string;
+  requirementsHeading: string;
+  registrationFlowHeading: string;
+  scheduleHeading: string;
+  scheduleSecondaryHeading: string;
   registrationInfo: string[];
   requirements: string[];
   registrationFlow: string[];
   scheduleItems: string[];
+  scheduleSecondaryItems: string[];
   ctaTitle: string;
   ctaDescription: string;
   seoTitle?: string;
@@ -198,7 +208,8 @@ export type SeoSettings = {
 const siteSettingsQuery = groq`
   *[_type == "siteSettings"] | order(_updatedAt desc)[0]{
     siteName,
-    "logoUrl": logo.asset->url
+    "logoUrl": logo.asset->url,
+    "siteIconUrl": siteIcon.asset->url
   }
 `;
 
@@ -324,10 +335,22 @@ const spmbSettingsQuery = groq`
     heroBadge,
     heroTitle,
     heroDescription,
+    galleryPhotos[]{
+      "imageUrl": image.asset->url,
+      alt
+    },
+    galleryHeading,
+    registrationInfoHeading,
+    concentrationsHeading,
+    requirementsHeading,
+    registrationFlowHeading,
+    scheduleHeading,
+    scheduleSecondaryHeading,
     registrationInfo,
     requirements,
     registrationFlow,
     scheduleItems,
+    scheduleSecondaryItems,
     ctaTitle,
     ctaDescription,
     seoTitle,
@@ -363,6 +386,7 @@ const profileSettingsQuery = groq`
 const fallbackSiteSettings: SiteSettings = {
   siteName: "SMK Web",
   logoUrl: "/logo-smk.svg",
+  siteIconUrl: "/logo-smk.svg",
 };
 
 const fallbackFooterSettings: FooterSettings = {
@@ -519,6 +543,18 @@ const fallbackSpmbSettings: SpmbSettings = {
   heroTitle: "Informasi SPMB",
   heroDescription:
     "Selamat datang di halaman resmi SPMB. Temukan informasi lengkap seputar pendaftaran, persyaratan, alur, jadwal, dan kontak panitia.",
+  galleryPhotos: [
+    { imageUrl: "/foto-sekolah-1.svg", alt: "Layanan informasi pendaftaran" },
+    { imageUrl: "/foto-sekolah-2.svg", alt: "Sosialisasi program keahlian" },
+    { imageUrl: "/hero-sekolah.svg", alt: "Kunjungan calon murid ke sekolah" },
+  ],
+  galleryHeading: "Suasana SPMB",
+  registrationInfoHeading: "Informasi Pendaftaran",
+  concentrationsHeading: "Program Keahlian Tersedia",
+  requirementsHeading: "Persyaratan",
+  registrationFlowHeading: "Alur Pendaftaran",
+  scheduleHeading: "Jadwal SPMB",
+  scheduleSecondaryHeading: "Jadwal Tahap Lanjutan",
   registrationInfo: [
     "SPMB dibuka untuk lulusan SMP/MTs atau sederajat.",
     "Pendaftaran dapat dilakukan secara online maupun datang langsung ke sekolah.",
@@ -545,6 +581,11 @@ const fallbackSpmbSettings: SpmbSettings = {
     "Seleksi dan wawancara: mengikuti jadwal dari panitia",
     "Pengumuman hasil: maksimal 7 hari setelah seleksi",
     "Daftar ulang: sesuai batas waktu yang ditetapkan",
+  ],
+  scheduleSecondaryItems: [
+    "MPLS: 1 minggu sebelum KBM dimulai",
+    "Pembagian kelas: setelah registrasi ulang",
+    "Tes pemetaan awal: pekan pertama tahun ajaran",
   ],
   ctaTitle: "Butuh Bantuan Pendaftaran?",
   ctaDescription:
@@ -616,6 +657,9 @@ export const getSiteSettings = cache(async function getSiteSettings(): Promise<S
       logoUrl:
         optimizeSanityImageUrl(data?.logoUrl, { width: 256, quality: 80 }) ||
         fallbackSiteSettings.logoUrl,
+      siteIconUrl:
+        optimizeSanityImageUrl(data?.siteIconUrl, { width: 512, quality: 90 }) ||
+        fallbackSiteSettings.siteIconUrl,
     };
   } catch {
     return fallbackSiteSettings;
@@ -870,6 +914,26 @@ export const getSpmbSettings = cache(
         heroBadge: data?.heroBadge || fallbackSpmbSettings.heroBadge,
         heroTitle: data?.heroTitle || fallbackSpmbSettings.heroTitle,
         heroDescription: data?.heroDescription || fallbackSpmbSettings.heroDescription,
+        galleryPhotos:
+          data?.galleryPhotos
+            ?.filter((item) => item?.imageUrl && item?.alt)
+            ?.map((item) => ({
+              ...item,
+              imageUrl:
+                optimizeSanityImageUrl(item.imageUrl, { width: 1200, quality: 75 }) ||
+                item.imageUrl,
+            })) || fallbackSpmbSettings.galleryPhotos,
+        galleryHeading: data?.galleryHeading || fallbackSpmbSettings.galleryHeading,
+        registrationInfoHeading:
+          data?.registrationInfoHeading || fallbackSpmbSettings.registrationInfoHeading,
+        concentrationsHeading:
+          data?.concentrationsHeading || fallbackSpmbSettings.concentrationsHeading,
+        requirementsHeading: data?.requirementsHeading || fallbackSpmbSettings.requirementsHeading,
+        registrationFlowHeading:
+          data?.registrationFlowHeading || fallbackSpmbSettings.registrationFlowHeading,
+        scheduleHeading: data?.scheduleHeading || fallbackSpmbSettings.scheduleHeading,
+        scheduleSecondaryHeading:
+          data?.scheduleSecondaryHeading || fallbackSpmbSettings.scheduleSecondaryHeading,
         registrationInfo:
           data?.registrationInfo?.filter((item) => typeof item === "string" && item.length > 0) ||
           fallbackSpmbSettings.registrationInfo,
@@ -882,6 +946,10 @@ export const getSpmbSettings = cache(
         scheduleItems:
           data?.scheduleItems?.filter((item) => typeof item === "string" && item.length > 0) ||
           fallbackSpmbSettings.scheduleItems,
+        scheduleSecondaryItems:
+          data?.scheduleSecondaryItems?.filter(
+            (item) => typeof item === "string" && item.length > 0,
+          ) || fallbackSpmbSettings.scheduleSecondaryItems,
         ctaTitle: data?.ctaTitle || fallbackSpmbSettings.ctaTitle,
         ctaDescription: data?.ctaDescription || fallbackSpmbSettings.ctaDescription,
         seoTitle: data?.seoTitle || fallbackSpmbSettings.seoTitle,

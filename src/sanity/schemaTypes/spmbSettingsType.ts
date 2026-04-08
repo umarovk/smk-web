@@ -27,6 +27,89 @@ export const spmbSettingsType = defineType({
       validation: (rule) => rule.min(20),
     }),
     defineField({
+      name: "galleryPhotos",
+      title: "Foto Suasana SPMB",
+      type: "array",
+      of: [
+        {
+          type: "object",
+          name: "photoItem",
+          title: "Foto",
+          fields: [
+            defineField({
+              name: "image",
+              title: "Gambar",
+              type: "image",
+              options: { hotspot: true },
+              validation: (rule) => rule.required(),
+            }),
+            defineField({
+              name: "alt",
+              title: "Alt Text",
+              type: "string",
+              validation: (rule) => rule.required().min(4),
+            }),
+          ],
+          preview: {
+            select: {
+              title: "alt",
+              media: "image",
+            },
+          },
+        },
+      ],
+      validation: (rule) => rule.min(1).max(6),
+    }),
+    defineField({
+      name: "galleryHeading",
+      title: "Judul Section Foto",
+      type: "string",
+      initialValue: "Suasana SPMB",
+      validation: (rule) => rule.required(),
+    }),
+    defineField({
+      name: "registrationInfoHeading",
+      title: "Judul Section Informasi Pendaftaran",
+      type: "string",
+      initialValue: "Informasi Pendaftaran",
+      validation: (rule) => rule.required(),
+    }),
+    defineField({
+      name: "concentrationsHeading",
+      title: "Judul Section Program Keahlian",
+      type: "string",
+      initialValue: "Program Keahlian Tersedia",
+      validation: (rule) => rule.required(),
+    }),
+    defineField({
+      name: "requirementsHeading",
+      title: "Judul Section Persyaratan",
+      type: "string",
+      initialValue: "Persyaratan",
+      validation: (rule) => rule.required(),
+    }),
+    defineField({
+      name: "registrationFlowHeading",
+      title: "Judul Section Alur Pendaftaran",
+      type: "string",
+      initialValue: "Alur Pendaftaran",
+      validation: (rule) => rule.required(),
+    }),
+    defineField({
+      name: "scheduleHeading",
+      title: "Judul Section Jadwal",
+      type: "string",
+      initialValue: "Jadwal SPMB",
+      validation: (rule) => rule.required(),
+    }),
+    defineField({
+      name: "scheduleSecondaryHeading",
+      title: "Judul Jadwal Kedua",
+      type: "string",
+      initialValue: "Jadwal Tahap Lanjutan",
+      validation: (rule) => rule.required(),
+    }),
+    defineField({
       name: "registrationInfo",
       title: "Informasi Pendaftaran",
       type: "array",
@@ -53,6 +136,13 @@ export const spmbSettingsType = defineType({
       type: "array",
       of: [{ type: "string" }],
       validation: (rule) => rule.min(3).max(12),
+    }),
+    defineField({
+      name: "scheduleSecondaryItems",
+      title: "Jadwal Kedua",
+      type: "array",
+      of: [{ type: "string" }],
+      validation: (rule) => rule.min(1).max(12),
     }),
     defineField({
       name: "ctaTitle",

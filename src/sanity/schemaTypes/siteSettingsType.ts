@@ -17,6 +17,13 @@ export const siteSettingsType = defineType({
       type: "image",
       options: { hotspot: true },
     }),
+    defineField({
+      name: "siteIcon",
+      title: "Site Icon (Favicon Tab Browser)",
+      type: "image",
+      options: { hotspot: true },
+      description: "Disarankan PNG persegi (minimal 64x64, ideal 512x512).",
+    }),
   ],
   preview: {
     select: {
