@@ -2,6 +2,8 @@ import { articleType } from "./articleType";
 import { concentrationType } from "./concentrationType";
 import { footerSettingsType } from "./footerSettingsType";
 import { homepageSettingsType } from "./homepageSettingsType";
+import { navDropdownType } from "./navDropdownType";
+import { navLinkType } from "./navLinkType";
 import { navbarSettingsType } from "./navbarSettingsType";
 import { partnerSettingsType } from "./partnerSettingsType";
 import { profileSettingsType } from "./profileSettingsType";
@@ -15,6 +17,8 @@ export const schemaTypes = [
   footerSettingsType,
   homepageSettingsType,
   navbarSettingsType,
+  navLinkType,
+  navDropdownType,
   partnerSettingsType,
   profileSettingsType,
   articleType,
