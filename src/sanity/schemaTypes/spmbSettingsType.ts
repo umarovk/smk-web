@@ -313,6 +313,53 @@ export const spmbSettingsType = defineType({
       validation: (rule) => rule.min(20),
     }),
     defineField({
+      name: "ctaButtons",
+      title: "Tombol CTA",
+      description:
+        "Tombol aksi yang muncul di 3 lokasi: di hero atas, setelah section tahfidz, dan sebelum CTA bawah.",
+      type: "array",
+      of: [
+        {
+          type: "object",
+          name: "ctaButtonItem",
+          title: "Tombol",
+          fields: [
+            defineField({
+              name: "label",
+              title: "Label",
+              type: "string",
+              validation: (rule) => rule.required(),
+            }),
+            defineField({
+              name: "href",
+              title: "Href",
+              type: "string",
+              description: "Path internal seperti /spmb#daftar atau URL eksternal https://...",
+              validation: (rule) => rule.required(),
+            }),
+            defineField({
+              name: "variant",
+              title: "Variant",
+              type: "string",
+              options: {
+                list: [
+                  { title: "Primary (solid)", value: "primary" },
+                  { title: "Secondary (outline)", value: "secondary" },
+                ],
+                layout: "radio",
+              },
+              initialValue: "primary",
+              validation: (rule) => rule.required(),
+            }),
+          ],
+          preview: {
+            select: { title: "label", subtitle: "href" },
+          },
+        },
+      ],
+      validation: (rule) => rule.max(4),
+    }),
+    defineField({
       name: "seoTitle",
       title: "SEO Title",
       type: "string",

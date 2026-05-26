@@ -6,93 +6,27 @@ export const navbarSettingsType = defineType({
   type: "document",
   fields: [
     defineField({
-      name: "mainLinks",
-      title: "Main Links",
+      name: "items",
+      title: "Navigation Items",
+      description:
+        "Daftar item navbar dari kiri ke kanan. Tambah 'Link' untuk link biasa atau 'Dropdown' untuk menu dropdown. Tombol CTA selalu muncul paling kanan.",
       type: "array",
-      of: [
-        defineField({
-          name: "mainLinkItem",
-          title: "Main Link",
-          type: "object",
-          fields: [
-            defineField({
-              name: "label",
-              title: "Label",
-              type: "string",
-              validation: (rule) => rule,
-            }),
-            defineField({
-              name: "href",
-              title: "Href",
-              type: "string",
-              description: "Gunakan path seperti /profil atau anchor seperti #kontak",
-              validation: (rule) => rule,
-            }),
-          ],
-          preview: {
-            select: {
-              title: "label",
-              subtitle: "href",
-            },
-          },
-        }),
-      ],
-      validation: (rule) => rule.min(1).max(8),
-    }),
-    defineField({
-      name: "jurusanLabel",
-      title: "Jurusan Dropdown Label",
-      type: "string",
-      initialValue: "Jurusan",
-      validation: (rule) => rule,
-    }),
-    defineField({
-      name: "secondaryLinks",
-      title: "Secondary Links",
-      type: "array",
-      of: [
-        defineField({
-          name: "secondaryLinkItem",
-          title: "Secondary Link",
-          type: "object",
-          fields: [
-            defineField({
-              name: "label",
-              title: "Label",
-              type: "string",
-              validation: (rule) => rule,
-            }),
-            defineField({
-              name: "href",
-              title: "Href",
-              type: "string",
-              description: "Gunakan path seperti /berita atau anchor seperti #kontak",
-              validation: (rule) => rule,
-            }),
-          ],
-          preview: {
-            select: {
-              title: "label",
-              subtitle: "href",
-            },
-          },
-        }),
-      ],
-      validation: (rule) => rule.max(8),
+      of: [{ type: "navLink" }, { type: "navDropdown" }],
+      validation: (rule) => rule.min(1).max(12),
     }),
     defineField({
       name: "ctaLabel",
       title: "CTA Button Label",
       type: "string",
       initialValue: "SPMB",
-      validation: (rule) => rule,
+      validation: (rule) => rule.required(),
     }),
     defineField({
       name: "ctaHref",
       title: "CTA Button Href",
       type: "string",
       initialValue: "/spmb",
-      validation: (rule) => rule,
+      validation: (rule) => rule.required(),
     }),
   ],
   preview: {

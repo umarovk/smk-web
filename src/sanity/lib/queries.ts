@@ -20,10 +20,23 @@ export type NavbarLink = {
   href: string;
 };
 
+export type NavLinkItem = {
+  _type: "navLink";
+  label: string;
+  href: string;
+};
+
+export type NavDropdownItem = {
+  _type: "navDropdown";
+  label: string;
+  source: "manual" | "concentrations";
+  items?: NavbarLink[];
+};
+
+export type NavItem = NavLinkItem | NavDropdownItem;
+
 export type NavbarSettings = {
-  mainLinks: NavbarLink[];
-  jurusanLabel: string;
-  secondaryLinks: NavbarLink[];
+  items: NavItem[];
   ctaLabel: string;
   ctaHref: string;
 };
@@ -169,6 +182,12 @@ export type TahfidzSettings = {
   seoDescription?: string;
 };
 
+export type SpmbCtaButton = {
+  label: string;
+  href: string;
+  variant: "primary" | "secondary";
+};
+
 export type SpmbSettings = {
   heroBadge: string;
   heroTitle: string;
@@ -200,6 +219,7 @@ export type SpmbSettings = {
   maleAchievementNote: string;
   ctaTitle: string;
   ctaDescription: string;
+  ctaButtons: SpmbCtaButton[];
   seoTitle?: string;
   seoDescription?: string;
 };
@@ -245,14 +265,14 @@ const footerSettingsQuery = groq`
 
 const navbarSettingsQuery = groq`
   *[_type == "navbarSettings"] | order(_updatedAt desc)[0]{
-    mainLinks[]{
+    items[]{
+      _type,
       label,
-      href
-    },
-    jurusanLabel,
-    secondaryLinks[]{
-      label,
-      href
+      _type == "navLink" => { href },
+      _type == "navDropdown" => {
+        source,
+        items[]{ label, href }
+      }
     },
     ctaLabel,
     ctaHref
@@ -388,6 +408,11 @@ const spmbSettingsQuery = groq`
     maleAchievementNote,
     ctaTitle,
     ctaDescription,
+    ctaButtons[]{
+      label,
+      href,
+      variant
+    },
     seoTitle,
     seoDescription
   }
@@ -438,15 +463,13 @@ const fallbackFooterSettings: FooterSettings = {
 };
 
 const fallbackNavbarSettings: NavbarSettings = {
-  mainLinks: [
-    { label: "Beranda", href: "/" },
-    { label: "Profil", href: "/profil" },
-    { label: "Program Tahfidz", href: "/tahfidz" },
-  ],
-  jurusanLabel: "Jurusan",
-  secondaryLinks: [
-    { label: "Berita", href: "/berita" },
-    { label: "Kontak", href: "/kontak" },
+  items: [
+    { _type: "navLink", label: "Beranda", href: "/" },
+    { _type: "navLink", label: "Profil", href: "/profil" },
+    { _type: "navLink", label: "Program Tahfidz", href: "/tahfidz" },
+    { _type: "navDropdown", label: "Jurusan", source: "concentrations" },
+    { _type: "navLink", label: "Berita", href: "/berita" },
+    { _type: "navLink", label: "Kontak", href: "/kontak" },
   ],
   ctaLabel: "SPMB",
   ctaHref: "/spmb",
@@ -672,6 +695,10 @@ const fallbackSpmbSettings: SpmbSettings = {
   ctaTitle: "Butuh Bantuan Pendaftaran?",
   ctaDescription:
     "Tim panitia SPMB siap membantu Anda terkait alur pendaftaran, berkas, dan jadwal seleksi.",
+  ctaButtons: [
+    { label: "Daftar Online", href: "#daftar", variant: "primary" },
+    { label: "Konsultasi", href: "#kontak", variant: "secondary" },
+  ],
   seoTitle: "SPMB",
   seoDescription:
     "Informasi SPMB meliputi persyaratan, alur pendaftaran, jadwal, program keahlian, dan kontak panitia.",
@@ -786,16 +813,36 @@ export const getNavbarSettings = cache(async function getNavbarSettings(): Promi
       { next: { revalidate: 60 } },
     );
 
+    if (!data) {
+      return fallbackNavbarSettings;
+    }
+
+    const filteredItems: NavItem[] =
+      data.items
+        ?.map((raw): NavItem | null => {
+          if (!raw || !raw.label) return null;
+          if (raw._type === "navLink") {
+            if (!raw.href) return null;
+            return { _type: "navLink", label: raw.label, href: raw.href };
+          }
+          if (raw._type === "navDropdown") {
+            const source = raw.source === "concentrations" ? "concentrations" : "manual";
+            const items =
+              source === "manual"
+                ? raw.items?.filter((it) => it?.label && it?.href) ?? []
+                : undefined;
+            if (source === "manual" && (!items || items.length === 0)) return null;
+            return { _type: "navDropdown", label: raw.label, source, items };
+          }
+          return null;
+        })
+        .filter((item): item is NavItem => item !== null) ?? [];
+
     return {
-      mainLinks:
-        data?.mainLinks?.filter((item) => item?.label && item?.href) ||
-        fallbackNavbarSettings.mainLinks,
-      jurusanLabel: data?.jurusanLabel || fallbackNavbarSettings.jurusanLabel,
-      secondaryLinks:
-        data?.secondaryLinks?.filter((item) => item?.label && item?.href) ||
-        fallbackNavbarSettings.secondaryLinks,
-      ctaLabel: data?.ctaLabel || fallbackNavbarSettings.ctaLabel,
-      ctaHref: data?.ctaHref || fallbackNavbarSettings.ctaHref,
+      items:
+        filteredItems.length > 0 ? filteredItems : fallbackNavbarSettings.items,
+      ctaLabel: data.ctaLabel || fallbackNavbarSettings.ctaLabel,
+      ctaHref: data.ctaHref || fallbackNavbarSettings.ctaHref,
     };
   } catch {
     return fallbackNavbarSettings;
@@ -1071,6 +1118,18 @@ export const getSpmbSettings = cache(
         maleAchievementNote: data?.maleAchievementNote || fallbackSpmbSettings.maleAchievementNote,
         ctaTitle: data?.ctaTitle || fallbackSpmbSettings.ctaTitle,
         ctaDescription: data?.ctaDescription || fallbackSpmbSettings.ctaDescription,
+        ctaButtons:
+          data?.ctaButtons
+            ?.filter(
+              (b): b is SpmbCtaButton =>
+                !!b && typeof b.label === "string" && b.label.length > 0 &&
+                typeof b.href === "string" && b.href.length > 0,
+            )
+            ?.map((b) => ({
+              label: b.label,
+              href: b.href,
+              variant: b.variant === "secondary" ? "secondary" : "primary",
+            })) || fallbackSpmbSettings.ctaButtons,
         seoTitle: data?.seoTitle || fallbackSpmbSettings.seoTitle,
         seoDescription: data?.seoDescription || fallbackSpmbSettings.seoDescription,
       };

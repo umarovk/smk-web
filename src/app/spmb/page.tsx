@@ -14,6 +14,7 @@ import {
   getSiteSettings,
   getSpmbSettings,
   getTahfidzSettings,
+  type SpmbCtaButton,
 } from "@/sanity/lib/queries";
 
 export const revalidate = 60;
@@ -35,6 +36,50 @@ function normalizePhone(phone: string) {
 
 function formatRupiah(amount: number) {
   return new Intl.NumberFormat("id-ID").format(amount);
+}
+
+function CtaButtons({
+  buttons,
+  tone,
+  className = "",
+}: {
+  buttons: SpmbCtaButton[];
+  tone: "light" | "dark";
+  className?: string;
+}) {
+  if (buttons.length === 0) return null;
+
+  return (
+    <div className={`flex flex-wrap gap-3 ${className}`}>
+      {buttons.map((btn) => {
+        const isExternal = /^https?:\/\//.test(btn.href);
+        const isPrimary = btn.variant === "primary";
+
+        const classes = isPrimary
+          ? tone === "dark"
+            ? "hover-shine inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-bold text-emerald-700 shadow-lg shadow-black/10 transition-all hover:bg-emerald-50"
+            : "hover-shine inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-600/20 transition-all hover:bg-emerald-700"
+          : tone === "dark"
+            ? "inline-flex items-center rounded-xl border border-white/25 px-5 py-3 text-sm font-semibold text-white transition-all hover:border-white/40 hover:bg-white/10"
+            : "inline-flex items-center rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition-all hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700";
+
+        const key = `${btn.label}-${btn.href}`;
+
+        if (isExternal) {
+          return (
+            <a key={key} href={btn.href} target="_blank" rel="noreferrer" className={classes}>
+              {btn.label}
+            </a>
+          );
+        }
+        return (
+          <Link key={key} href={btn.href} className={classes}>
+            {btn.label}
+          </Link>
+        );
+      })}
+    </div>
+  );
 }
 
 export default async function SpmbPage() {
@@ -82,6 +127,7 @@ export default async function SpmbPage() {
             <p className="mt-4 max-w-3xl text-sm leading-7 text-emerald-100/90 sm:text-base">
               {spmb.heroDescription}
             </p>
+            <CtaButtons buttons={spmb.ctaButtons} tone="dark" className="mt-6" />
           </div>
         </section>
 
@@ -193,6 +239,8 @@ export default async function SpmbPage() {
             </div>
           </div>
         </section>
+
+        <CtaButtons buttons={spmb.ctaButtons} tone="light" className="mt-8 justify-center" />
 
         <section className="mt-8 grid gap-6 md:grid-cols-2">
           <article className="rounded-2xl border border-slate-100 bg-[var(--surface)] p-6">
@@ -331,6 +379,8 @@ export default async function SpmbPage() {
             </div>
           </section>
         )}
+
+        <CtaButtons buttons={spmb.ctaButtons} tone="light" className="mt-10 justify-center" />
 
         <section className="relative mt-10 overflow-hidden rounded-[1.75rem] bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-700 px-6 py-12 text-center sm:px-12">
           <div className="absolute inset-0 dot-grid opacity-[0.06]" />
