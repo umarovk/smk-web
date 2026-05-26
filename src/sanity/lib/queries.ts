@@ -182,6 +182,12 @@ export type TahfidzSettings = {
   seoDescription?: string;
 };
 
+export type SpmbCtaButton = {
+  label: string;
+  href: string;
+  variant: "primary" | "secondary";
+};
+
 export type SpmbSettings = {
   heroBadge: string;
   heroTitle: string;
@@ -213,6 +219,7 @@ export type SpmbSettings = {
   maleAchievementNote: string;
   ctaTitle: string;
   ctaDescription: string;
+  ctaButtons: SpmbCtaButton[];
   seoTitle?: string;
   seoDescription?: string;
 };
@@ -401,6 +408,11 @@ const spmbSettingsQuery = groq`
     maleAchievementNote,
     ctaTitle,
     ctaDescription,
+    ctaButtons[]{
+      label,
+      href,
+      variant
+    },
     seoTitle,
     seoDescription
   }
@@ -683,6 +695,10 @@ const fallbackSpmbSettings: SpmbSettings = {
   ctaTitle: "Butuh Bantuan Pendaftaran?",
   ctaDescription:
     "Tim panitia SPMB siap membantu Anda terkait alur pendaftaran, berkas, dan jadwal seleksi.",
+  ctaButtons: [
+    { label: "Daftar Online", href: "#daftar", variant: "primary" },
+    { label: "Konsultasi", href: "#kontak", variant: "secondary" },
+  ],
   seoTitle: "SPMB",
   seoDescription:
     "Informasi SPMB meliputi persyaratan, alur pendaftaran, jadwal, program keahlian, dan kontak panitia.",
@@ -1102,6 +1118,18 @@ export const getSpmbSettings = cache(
         maleAchievementNote: data?.maleAchievementNote || fallbackSpmbSettings.maleAchievementNote,
         ctaTitle: data?.ctaTitle || fallbackSpmbSettings.ctaTitle,
         ctaDescription: data?.ctaDescription || fallbackSpmbSettings.ctaDescription,
+        ctaButtons:
+          data?.ctaButtons
+            ?.filter(
+              (b): b is SpmbCtaButton =>
+                !!b && typeof b.label === "string" && b.label.length > 0 &&
+                typeof b.href === "string" && b.href.length > 0,
+            )
+            ?.map((b) => ({
+              label: b.label,
+              href: b.href,
+              variant: b.variant === "secondary" ? "secondary" : "primary",
+            })) || fallbackSpmbSettings.ctaButtons,
         seoTitle: data?.seoTitle || fallbackSpmbSettings.seoTitle,
         seoDescription: data?.seoDescription || fallbackSpmbSettings.seoDescription,
       };
